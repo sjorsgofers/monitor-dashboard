@@ -6,64 +6,76 @@
   <title>Zusje Roermond Dashboard</title>
   <style>
     html, body { height:100%; margin:0; }
-    body { background:#000; overflow:hidden; }
+    /* Belangrijk: laat scroll toe op de pagina */
+    body { background:#000; overflow:auto; }
 
+    /* Shell vult de breedte, maar mag in de hoogte groeien (scroll) */
     #dashboard-shell{
-      position:fixed; inset:0;
+      position:relative;
+      min-height:100vh;
       background:#f3f6fb;
-      overflow:hidden;
+      overflow:visible; /* scroll via body */
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
-    .zd-stage{ position:relative; width:100%; height:100%; }
+    /* Stage en frame NIET meer absolute/geschaald: gewoon in flow */
+    .zd-stage{ width:100%; }
     .zd-frame{
-      position:absolute;
-      left:50%; top:50%;
-      width:1600px; height:900px;
-      transform:translate(-50%,-50%) scale(1);
-      transform-origin:center center;
+      width:1600px;           /* vaste ontwerpbreedte */
+      margin:0 auto;          /* centreer horizontaal */
+      /* hoogte niet vastzetten -> groeit met content */
     }
 
-    .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
+    /* UI */
+    .zd-wrap{ padding:28px; color:#0b1220; background:#f3f6fb; }
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
-    .zd-title{ font-weight:900; font-size:44px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .zd-title{ font-weight:900; font-size:44px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
     .zd-meta{ color:#60708d; font-size:18px; margin-top:8px; }
     .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:42px; color:#0f172a; text-align:right; }
     .zd-date{ color:#60708d; font-size:18px; text-align:right; }
 
-    .zd-grid{ display:grid; gap:24px; grid-template-columns:repeat(12,1fr); height:calc(100% - 110px); }
+    /* Belangrijk: GEEN vaste hoogte meer -> grid groeit met content */
+    .zd-grid{ display:grid; gap:24px; grid-template-columns:repeat(12,1fr); }
     .zd-col-3{ grid-column:span 3; }
     .zd-col-4{ grid-column:span 4; }
     .zd-col-5{ grid-column:span 5; }
     .zd-col-12{ grid-column:span 12; }
 
     .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); }
-    .zd-card{ background:#fff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
+    .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; }
     .zd-band{ height:10px; width:100%; }
     .zd-band-check{  background:linear-gradient(90deg,#2563eb,#7ea5ff); }
     .zd-band-period{ background:linear-gradient(90deg,#0ea5a4,#8cf2e8); }
     .zd-band-orders{ background:linear-gradient(90deg,#f59e0b,#ffe29a); }
     .zd-band-waste{  background:linear-gradient(90deg,#16a34a,#a7f3d0); }
 
-    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:22px; background:linear-gradient(#fff,#fbfdff); display:flex; align-items:center; gap:10px; color:#0f172a; }
-    .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
+    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:22px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
+    .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
+
+    /* Lichaam van de kaart: laat eigen scroll toe als inhoud te lang is,
+       maar omdat de hele pagina mag scrollen is dit optioneel */
     .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
 
     .zd-list{ display:flex; flex-direction:column; gap:12px; }
     .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
-    .zd-name{ font-weight:800; font-size:20px; color:#0b1220; }
+    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:20px; color:#0b1220; }
     .zd-name em{ font-style:normal; color:#64748b; font-weight:700; }
 
-    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:16px; padding:10px 14px; border-radius:999px; box-shadow:0 6px 16px rgba(0,0,0,.06); }
-    .zd-ok{ color:#065f46; background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
-    .zd-warn{ color:#7c2d12; background:linear-gradient(180deg,#fef3c7,#fde68a); }
-    .zd-bad{ color:#7f1d1d; background:linear-gradient(180deg,#fee2e2,#fecaca); }
-    .zd-open{ color:#023047; background:linear-gradient(180deg,#cffafe,#bae6fd); }
+    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:16px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
+    .zd-ok{   color:#065f46; border-color:rgba(16,185,129,.35); background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
+    .zd-warn{ color:#7c2d12; border-color:rgba(245,158,11,.4);  background:linear-gradient(180deg,#fef3c7,#fde68a); }
+    .zd-bad{  color:#7f1d1d; border-color:rgba(239,68,68,.4);   background:linear-gradient(180deg,#fee2e2,#fecaca); }
+    .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
 
     .zd-cols2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     .zd-subcard{ background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:14px; }
-    .zd-subtitle{ font-weight:900; color:#064e3b; margin:0 0 10px; display:flex; align-items:center; gap:8px; }
+    .zd-subtitle{ font-weight:900; letter-spacing:.2px; color:#064e3b; margin:0 0 10px 0; display:flex; align-items:center; gap:8px; }
     .zd-pill{ margin-left:auto; font-size:12px; font-weight:800; color:#065f46; padding:4px 10px; border-radius:999px; border:1px solid #c7ead8; background:#e8fff4; }
+
+    /* Optioneel: op schermen smaller dan 1600px, geef wat horizontale marge */
+    @media (max-width: 1640px){
+      .zd-frame { width: 100%; max-width:1600px; padding: 0 20px; box-sizing:border-box; }
+    }
   </style>
 </head>
 <body>
@@ -134,7 +146,8 @@
 
   <script>
   (function(){
-    const CONFIG={
+    /* ====== Config ====== */
+    const CONFIG = {
       sheets:{
         checklistsJson:"https://script.google.com/macros/s/AKfycbw_Tn0z0s3AJ7CARzHt9sFy8CGhrCe_HzS9ao0KKDtgzq9TR_H-28WBss316I6PDcr7/exec",
         periodicJson:"https://script.google.com/macros/s/AKfycbxEDSHzBOrrYqkNOCQI6clM6DNuoge55tdATn1XNC63HT7GgPcsZF5AT3dwfaLjEUmV/exec"
@@ -142,6 +155,7 @@
       refreshMs:15000
     };
 
+    /* ====== State ====== */
     const state={checklists:[],periodicTasks:[],ordersRules:[
       {vendor:"Bidfood",weekdays:[2],deadline:"00:00"},
       {vendor:"Bubbels",weekdays:[3],deadline:"23:00",evenWeeks:true},
@@ -151,7 +165,8 @@
       wasteBase:{1:["Bidfood emballage klaarzetten","Glas containers klaarzetten","Gele Zusje kratten klaarzetten"],2:["Restafval containers klaarzetten"],3:["Bidfood emballage klaarzetten"],4:["Papier container klaarzetten"],5:["Bidfood emballage klaarzetten"],0:["Restafval containers klaarzetten"]},
       thursdayPlastic:"Plastic containers klaarzetten"};
 
-    const $=s=>document.querySelector(s);
+    /* ====== Helpers ====== */
+    const $=sel=>document.querySelector(sel);
     const pad=n=>String(n).padStart(2,"0");
     const getOpsDate=d=>{const x=new Date(d||Date.now());if(x.getHours()<4)x.setDate(x.getDate()-1);return x;};
     const fmtDutchDate=d=>d.toLocaleDateString("nl-NL",{weekday:"long",day:"2-digit",month:"long"});
@@ -159,26 +174,61 @@
     const isEvenWeek=d=>weekNumber(d)%2===0;
     const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
 
-    async function fetchChecklists(){try{const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store",mode:"cors"});if(r.ok){const j=await r.json();if(Array.isArray(j.items)){state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);}}}catch(e){console.warn("Checklist fetch",e);}}
-    async function fetchPeriodic(){const u=CONFIG.sheets.periodicJson;if(!u)return;try{const sep=u.includes("?")?"&":"?";const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store",mode:"cors"});if(r.ok){const j=await r.json();state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];}}catch(e){console.warn("Periodic fetch",e);}}
+    /* ====== Data ====== */
+    async function fetchChecklists(){try{const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store",mode:"cors"});if(r.ok){const j=await r.json();if(Array.isArray(j.items)){state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);}}}catch(e){console.warn("Checklist fetch fail",e);}}
+    async function fetchPeriodic(){const u=CONFIG.sheets.periodicJson;if(!u)return;try{const sep=u.includes("?")?"&":"?";const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store",mode:"cors"});if(r.ok){const j=await r.json();state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];}}catch(e){console.warn("Periodic fail",e);}}
     async function loadAll(){await Promise.allSettled([fetchChecklists(),fetchPeriodic()]);renderAll();}
 
+    /* ====== Render ====== */
     function renderHeader(){const n=new Date(),ops=getOpsDate(n);$("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;$("#zd-date").textContent=fmtDutchDate(ops);}
     function renderChecklists(){const list=$("#zd-checklistList");list.innerHTML="";if(!state.checklists.length){list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`;return;}state.checklists.forEach(c=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;list.appendChild(el);});}
     function renderPeriodic(){const list=$("#zd-periodicList");list.innerHTML="";const t=state.periodicTasks||[];if(!t.length){list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div><div>${chip("open","—")}</div></div>`;return;}t.forEach(x=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${x.title}</div><div>${chip("ok","Inplannen/Check")}</div>`;list.appendChild(el);});}
-    function renderOrders(){const wrap=$("#zd-ordersList");wrap.innerHTML="";const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);const td=state.ordersRules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));if(!td.length){wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div><div>${chip("open","—")}</div></div>`;return;}td.forEach(r=>{let limit=new Date(ops);if(r.deadline==="00:00"){limit.setDate(limit.getDate()+1);limit.setHours(0,0,0,0);}else{const[h,m]=(r.deadline||"23:59").split(":").map(Number);limit.setHours(h,m||0,0,0);}const diff=Math.round((limit-n)/60000);let type="open",lab=`vóór ${r.deadline}`;if(diff<0){type="bad";lab="Te laat";}else if(diff<=60){type="warn";lab=`Binnen ${diff}m`;}const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div><div>${chip(type,type==="open"?"Doen":lab)}</div>`;wrap.appendChild(el);});}
+    function renderOrders(){const wrap=$("#zd-ordersList");wrap.innerHTML="";const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);const td=state.ordersRules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));if(!td.length){wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div><div>${chip("open","—")}</div></div>`;return;}td.forEach(r=>{let limit=new Date(ops);if(r.deadline==="00:00"){limit.setDate(limit.getDate()+1);limit.setHours(0,0,0,0);}else{const [h,m]=(r.deadline||"23:59").split(":").map(Number);limit.setHours(h,m||0,0,0);}const diff=Math.round((limit-n)/60000);let type="open",lab=`vóór ${r.deadline}`;if(diff<0){type="bad";lab="Te laat";}else if(diff<=60){type="warn";lab=`Binnen ${diff}m`;}const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div><div>${chip(type,type==="open"?"Doen":lab)}</div>`;wrap.appendChild(el);});}
     function renderWaste(){
       const ops=getOpsDate(new Date()), dow=ops.getDay();
-      let list=state.wasteBase[dow]?[...state.wasteBase[dow]]:[];
-      if(dow===4 && weekNumber(ops)%2===0 && !list.includes(state.thursdayPlastic)) list.push(state.thursdayPlastic);
-      const cont=[],emb=[];
-      list.forEach(n=>{const s=n.toLowerCase();const isC=/container|restafval|papier|plastic|pm[dr]|glas/.test(s);const isE=/emballage|krat|kratten|fust|fusten|bidfood|zusje/.test(s);if(isC&&!isE)cont.push(n);else if(isE&&!isC)emb.push(n);else cont.push(n);});
-      const lc=$("#zd-wasteContainers"),le=$("#zd-wasteEmballage");
-      lc.innerHTML="";le.innerHTML="";
-      if(!cont.length)lc.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
-      if(!emb.length)le.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
+      let list = state.wasteBase[dow] ? [...state.wasteBase[dow]] : [];
+      if(dow===4 && weekNumber(ops)%2===0){
+        if(state.thursdayPlastic && !list.includes(state.thursdayPlastic)) list.push(state.thursdayPlastic);
+      }
+      const cont=[], emb=[];
+      list.forEach(n=>{
+        const s=n.toLowerCase();
+        const isC=/container|restafval|papier|plastic|pm[dr]|glas/.test(s);
+        const isE=/emballage|krat|kratten|fust|fusten|bidfood|zusje/.test(s);
+        if(isC && !isE) cont.push(n);
+        else if(isE && !isC) emb.push(n);
+        else cont.push(n);
+      });
+      const lc=$("#zd-wasteContainers"), le=$("#zd-wasteEmballage");
+      lc.innerHTML=""; le.innerHTML="";
+      if(!cont.length) lc.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
+      if(!emballage.length) le.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
       cont.forEach(n=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;lc.appendChild(el);});
       emb.forEach(n=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;le.appendChild(el);});
-      $("#zd-cntContainers").textContent=cont.length;$("#zd-cntEmballage").textContent=emb.length;
+      $("#zd-cntContainers").textContent=cont.length; $("#zd-cntEmballage").textContent=emb.length;
     }
 
+    function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); renderWaste(); }
+
+    /* ====== Fullscreen via 'F' (met scroll) ====== */
+    async function toggleFS(){
+      try{
+        if(document.fullscreenElement){ await document.exitFullscreen(); }
+        else{
+          const el = document.getElementById('dashboard-shell');
+          if(el.requestFullscreen) await el.requestFullscreen();
+          else if(document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+        }
+      }catch(_){}
+    }
+    document.addEventListener('keydown', (e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
+
+    /* Init */
+    renderHeader(); renderAll();
+    setInterval(()=>{ renderHeader(); },1000);
+    setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
+    loadAll();
+  })();
+  </script>
+</body>
+</html>
