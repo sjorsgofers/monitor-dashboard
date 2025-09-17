@@ -6,22 +6,22 @@
   <title>Zusje Roermond Dashboard</title>
   <style>
     html, body { height:100%; margin:0; }
-    body { background:#000; overflow:auto; } /* scrolbaar indien nodig */
+    body { background:#000; overflow:hidden; } /* geen scrollbars, we schalen altijd passend */
 
-    /* Vult altijd het hele venster */
+    /* Container die het hele venster vult */
     #dashboard-shell{
-      position:relative; min-height:100vh;
+      position:fixed; inset:0;
       background:#f3f6fb;
       overflow:hidden;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
-    /* Vast canvas 1600x900 dat we schalen */
-    .zd-stage{ position:relative; width:100%; height:100vh; }
+    /* Vast canvas 1600x900 dat we via transform schalen */
+    .zd-stage{ position:relative; width:100%; height:100%; }
     .zd-frame{
       position:absolute;
       left:50%; top:50%;
-      width:1600px; height:900px;
+      width:1600px; height:900px; /* design canvas */
       transform: translate(-50%, -50%) scale(1);
       transform-origin: center center;
       will-change: transform;
@@ -200,7 +200,7 @@
     const isEvenWeek=d=>weekNumber(d)%2===0;
     const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
 
-    /* ====== Data (met JSONP fallback) ====== */
+    /* ====== Data ====== */
     async function fetchChecklists(){
       try{
         const j = await getJSON(CONFIG.sheets.checklistsJson);
@@ -301,19 +301,49 @@
 
     function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); renderWaste(); fitFrame(); }
 
-    /* ====== Perfect passend schalen (met veilige marge) ====== */
-    const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 24;
+    /* ====== Perfect passend schalen (reageert op zoom & fullscreen) ====== */
+    const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 16; // iets kleinere marge
+    let lastDPR = window.devicePixelRatio;
+
+    function getViewportSize(){
+      // visualViewport is het meest betrouwbaar bij zoom
+      if (window.visualViewport) {
+        return { w: window.visualViewport.width, h: window.visualViewport.height };
+      }
+      // fallback
+      return { w: window.innerWidth, h: window.innerHeight };
+    }
+
     function fitFrame(){
-      const shell = document.getElementById('dashboard-shell');
       const frame = document.getElementById('zd-frame');
-      const viewW = Math.max(1, window.innerWidth  || shell.clientWidth  || document.documentElement.clientWidth);
-      const viewH = Math.max(1, window.innerHeight || shell.clientHeight || document.documentElement.clientHeight);
-      const scale = Math.min(
-        (viewW - SAFE_MARGIN_PX) / FRAME_W,
-        (viewH - SAFE_MARGIN_PX) / FRAME_H
-      );
+      const { w, h } = getViewportSize();
+
+      // maak een klein beetje ruimte (SAFE_MARGIN_PX) zodat niets afvalt
+      const scale = Math.max(0.1, Math.min(
+        (w - SAFE_MARGIN_PX) / FRAME_W,
+        (h - SAFE_MARGIN_PX) / FRAME_H
+      ));
+
       frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
+
+    // Refit bij allerlei situaties (zoom, fullscreen, resize, fonts geladen, etc.)
+    window.addEventListener('resize', fitFrame);
+    window.addEventListener('orientationchange', fitFrame);
+    document.addEventListener('fullscreenchange', fitFrame);
+    if (window.visualViewport){
+      window.visualViewport.addEventListener('resize', fitFrame);
+      window.visualViewport.addEventListener('scroll', fitFrame);
+    }
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
+
+    // Watch op devicePixelRatio (detecteert zoom op sommige browsers)
+    setInterval(()=>{
+      if (window.devicePixelRatio !== lastDPR){
+        lastDPR = window.devicePixelRatio;
+        fitFrame();
+      }
+    }, 400);
 
     /* ====== Fullscreen via sneltoets 'F' ====== */
     async function toggleFS(){
@@ -329,17 +359,10 @@
     }
     document.addEventListener('keydown', (e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
 
-    /* ====== Refit hooks ====== */
-    window.addEventListener('resize', fitFrame);
-    window.addEventListener('orientationchange', fitFrame);
-    document.addEventListener('fullscreenchange', fitFrame);
-    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) fitFrame(); });
-    if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
-
     /* ====== Init loops ====== */
     fitFrame(); renderHeader(); loadAll();
-    setInterval(()=>{ renderHeader(); fitFrame(); },1000);
-    setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
+    setInterval(()=>{ renderHeader(); /* klok */ },1000);
+    setInterval(()=>{ loadAll(); /* data refresh */ }, CONFIG.refreshMs);
   })();
   </script>
 </body>
