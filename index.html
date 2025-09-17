@@ -6,43 +6,43 @@
   <title>Zusje Roermond Dashboard</title>
   <style>
     html, body { height:100%; margin:0; }
-    /* Belangrijk: laat scroll toe op de pagina */
-    body { background:#000; overflow:auto; }
+    body { background:#000; overflow:hidden; } /* geen scrollbars */
 
-    /* Shell vult de breedte, maar mag in de hoogte groeien (scroll) */
+    /* Vult altijd het hele venster */
     #dashboard-shell{
-      position:relative;
-      min-height:100vh;
+      position:fixed; inset:0;
       background:#f3f6fb;
-      overflow:visible; /* scroll via body */
+      overflow:hidden;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
-    /* Stage en frame NIET meer absolute/geschaald: gewoon in flow */
-    .zd-stage{ width:100%; }
+    /* Vast canvas 1600x900 dat we schalen */
+    .zd-stage{ position:relative; width:100%; height:100%; }
     .zd-frame{
-      width:1600px;           /* vaste ontwerpbreedte */
-      margin:0 auto;          /* centreer horizontaal */
-      /* hoogte niet vastzetten -> groeit met content */
+      position:absolute;
+      left:50%; top:50%;
+      width:1600px; height:900px;
+      transform: translate(-50%, -50%) scale(1);
+      transform-origin: center center;
+      will-change: transform;
     }
 
-    /* UI */
-    .zd-wrap{ padding:28px; color:#0b1220; background:#f3f6fb; }
+    /* UI (prefixed met zd-) */
+    .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
     .zd-title{ font-weight:900; font-size:44px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
     .zd-meta{ color:#60708d; font-size:18px; margin-top:8px; }
     .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:42px; color:#0f172a; text-align:right; }
     .zd-date{ color:#60708d; font-size:18px; text-align:right; }
 
-    /* Belangrijk: GEEN vaste hoogte meer -> grid groeit met content */
-    .zd-grid{ display:grid; gap:24px; grid-template-columns:repeat(12,1fr); }
+    .zd-grid{ display:grid; gap:24px; grid-template-columns:repeat(12,1fr); height:calc(100% - 110px); }
     .zd-col-3{ grid-column:span 3; }
     .zd-col-4{ grid-column:span 4; }
     .zd-col-5{ grid-column:span 5; }
     .zd-col-12{ grid-column:span 12; }
 
     .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); }
-    .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; }
+    .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
     .zd-band{ height:10px; width:100%; }
     .zd-band-check{  background:linear-gradient(90deg,#2563eb,#7ea5ff); }
     .zd-band-period{ background:linear-gradient(90deg,#0ea5a4,#8cf2e8); }
@@ -51,10 +51,7 @@
 
     .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:22px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
     .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
-
-    /* Lichaam van de kaart: laat eigen scroll toe als inhoud te lang is,
-       maar omdat de hele pagina mag scrollen is dit optioneel */
-    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
+    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; } /* scrolt binnen de kaart */
 
     .zd-list{ display:flex; flex-direction:column; gap:12px; }
     .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
@@ -71,16 +68,11 @@
     .zd-subcard{ background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:14px; }
     .zd-subtitle{ font-weight:900; letter-spacing:.2px; color:#064e3b; margin:0 0 10px 0; display:flex; align-items:center; gap:8px; }
     .zd-pill{ margin-left:auto; font-size:12px; font-weight:800; color:#065f46; padding:4px 10px; border-radius:999px; border:1px solid #c7ead8; background:#e8fff4; }
-
-    /* Optioneel: op schermen smaller dan 1600px, geef wat horizontale marge */
-    @media (max-width: 1640px){
-      .zd-frame { width: 100%; max-width:1600px; padding: 0 20px; box-sizing:border-box; }
-    }
   </style>
 </head>
 <body>
   <div id="dashboard-shell">
-    <div class="zd-stage">
+    <div class="zd-stage" id="zd-stage">
       <div class="zd-frame" id="zd-frame">
         <div class="zd-wrap">
           <div class="zd-header">
@@ -175,8 +167,8 @@
     const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
 
     /* ====== Data ====== */
-    async function fetchChecklists(){try{const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store",mode:"cors"});if(r.ok){const j=await r.json();if(Array.isArray(j.items)){state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);}}}catch(e){console.warn("Checklist fetch fail",e);}}
-    async function fetchPeriodic(){const u=CONFIG.sheets.periodicJson;if(!u)return;try{const sep=u.includes("?")?"&":"?";const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store",mode:"cors"});if(r.ok){const j=await r.json();state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];}}catch(e){console.warn("Periodic fail",e);}}
+    async function fetchChecklists(){try{const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store"});if(r.ok){const j=await r.json();if(Array.isArray(j.items)){state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);}}}catch(e){console.warn("Checklist fetch fail",e);}}
+    async function fetchPeriodic(){const u=CONFIG.sheets.periodicJson;if(!u)return;try{const sep=u.includes("?")?"&":"?";const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});if(r.ok){const j=await r.json();state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];}}catch(e){console.warn("Periodic fail",e);}}
     async function loadAll(){await Promise.allSettled([fetchChecklists(),fetchPeriodic()]);renderAll();}
 
     /* ====== Render ====== */
@@ -202,19 +194,37 @@
       const lc=$("#zd-wasteContainers"), le=$("#zd-wasteEmballage");
       lc.innerHTML=""; le.innerHTML="";
       if(!cont.length) lc.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
-      if(!emballage.length) le.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
+      if(!emb.length)  le.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
       cont.forEach(n=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;lc.appendChild(el);});
       emb.forEach(n=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;le.appendChild(el);});
       $("#zd-cntContainers").textContent=cont.length; $("#zd-cntEmballage").textContent=emb.length;
     }
 
-    function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); renderWaste(); }
+    function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); renderWaste(); fitFrame(); }
 
-    /* ====== Fullscreen via 'F' (met scroll) ====== */
+    /* ====== Perfect passend schalen (met veilige marge) ====== */
+    const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 24; // extra ruimte onder/naast
+    function fitFrame(){
+      const shell = document.getElementById('dashboard-shell');
+      const frame = document.getElementById('zd-frame');
+
+      const viewW = Math.max(1, window.innerWidth  || shell.clientWidth  || document.documentElement.clientWidth);
+      const viewH = Math.max(1, window.innerHeight || shell.clientHeight || document.documentElement.clientHeight);
+
+      const scale = Math.min(
+        (viewW - SAFE_MARGIN_PX) / FRAME_W,
+        (viewH - SAFE_MARGIN_PX) / FRAME_H
+      );
+
+      frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    }
+
+    /* ====== Fullscreen via sneltoets 'F' (geen knop) ====== */
     async function toggleFS(){
       try{
-        if(document.fullscreenElement){ await document.exitFullscreen(); }
-        else{
+        if(document.fullscreenElement){
+          await document.exitFullscreen();
+        }else{
           const el = document.getElementById('dashboard-shell');
           if(el.requestFullscreen) await el.requestFullscreen();
           else if(document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
@@ -223,11 +233,17 @@
     }
     document.addEventListener('keydown', (e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
 
-    /* Init */
-    renderHeader(); renderAll();
-    setInterval(()=>{ renderHeader(); },1000);
-    setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
-    loadAll();
+    /* ====== Refit hooks ====== */
+    window.addEventListener('resize', fitFrame);
+    window.addEventListener('orientationchange', fitFrame);
+    document.addEventListener('fullscreenchange', fitFrame);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) fitFrame(); });
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
+
+    /* ====== Init loops ====== */
+    fitFrame(); renderHeader(); loadAll();
+    setInterval(()=>{ renderHeader(); fitFrame(); },1000);
+    setInterval(()=>{ loadAll(); /* fitFrame wordt in renderAll geroepen */ }, CONFIG.refreshMs);
   })();
   </script>
 </body>
