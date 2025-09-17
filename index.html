@@ -6,68 +6,77 @@
   <title>Zusje Roermond Dashboard</title>
   <style>
     html, body { height:100%; margin:0; }
-    body { background:#000; overflow:hidden; } /* geen scrollbars */
+    /* Scroll toestaan op de pagina */
+    body { background:#000; overflow:auto; }
 
-    /* Vult altijd het hele venster */
+    /* Shell groeit mee met de content (scroll via body) */
     #dashboard-shell{
-      position:fixed; inset:0;
+      position:relative;
+      min-height:100vh;
       background:#f3f6fb;
-      overflow:hidden;
+      overflow:visible;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
-    /* Vast canvas 1600x900 dat we schalen */
-    .zd-stage{ position:relative; width:100%; height:100%; }
+    .zd-stage{ width:100%; }
+    /* Iets kleinere ‘canvas’ breedte en niet meer absolute gecentreerd */
     .zd-frame{
-      position:absolute;
-      left:50%; top:50%;
-      width:1600px; height:900px;
-      transform: translate(-50%, -50%) scale(1);
-      transform-origin: center center;
-      will-change: transform;
+      width:1500px;                 /* was 1600px */
+      max-width:100%;
+      margin:16px auto;             /* centreer in de flow */
+      box-sizing:border-box;
     }
 
-    /* UI (prefixed met zd-) */
-    .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
-    .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
-    .zd-title{ font-weight:900; font-size:44px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .zd-meta{ color:#60708d; font-size:18px; margin-top:8px; }
-    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:42px; color:#0f172a; text-align:right; }
-    .zd-date{ color:#60708d; font-size:18px; text-align:right; }
+    /* UI (iets compacter gemaakt) */
+    .zd-wrap{ width:100%; padding:24px; color:#0b1220; background:#f3f6fb; } /* was 28px */
+    .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:20px; } /* was 24px */
+    .zd-title{ font-weight:900; font-size:40px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; } /* was 44px */
+    .zd-meta{ color:#60708d; font-size:16px; margin-top:6px; } /* was 18px */
 
-    .zd-grid{ display:grid; gap:24px; grid-template-columns:repeat(12,1fr); height:calc(100% - 110px); }
+    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:38px; color:#0f172a; text-align:right; } /* was 42px */
+    .zd-date{ color:#60708d; font-size:16px; text-align:right; } /* was 18px */
+
+    /* Geen vaste hoogte -> grid groeit met content */
+    .zd-grid{ display:grid; gap:20px; grid-template-columns:repeat(12,1fr); } /* gap was 24px */
     .zd-col-3{ grid-column:span 3; }
     .zd-col-4{ grid-column:span 4; }
     .zd-col-5{ grid-column:span 5; }
     .zd-col-12{ grid-column:span 12; }
 
-    .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); }
-    .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
-    .zd-band{ height:10px; width:100%; }
+    .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:24px; padding:12px; box-shadow:0 20px 50px rgba(15,23,42,.08); } /* iets kleiner */
+    .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:20px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; }
+    .zd-band{ height:8px; width:100%; } /* was 10px */
     .zd-band-check{  background:linear-gradient(90deg,#2563eb,#7ea5ff); }
     .zd-band-period{ background:linear-gradient(90deg,#0ea5a4,#8cf2e8); }
     .zd-band-orders{ background:linear-gradient(90deg,#f59e0b,#ffe29a); }
     .zd-band-waste{  background:linear-gradient(90deg,#16a34a,#a7f3d0); }
 
-    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:22px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
-    .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
-    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; } /* scrolt binnen de kaart */
+    .zd-card-h{ padding:14px 16px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:20px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; } /* compacter */
+    .zd-tag{ margin-left:auto; font-size:11px; font-weight:800; color:#0b1220; padding:5px 10px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
 
-    .zd-list{ display:flex; flex-direction:column; gap:12px; }
-    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
-    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:20px; color:#0b1220; }
+    /* Card body kan eigen scroll hebben als nodig */
+    .zd-card-b{ padding:16px; gap:12px; display:flex; flex-direction:column; flex:1; overflow:auto; } /* compacter */
+
+    .zd-list{ display:flex; flex-direction:column; gap:10px; }
+    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:14px 16px; border-radius:12px; border:1px solid #e5e7eb; }
+    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:19px; color:#0b1220; } /* was 20px */
     .zd-name em{ font-style:normal; color:#64748b; font-weight:700; }
 
-    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:16px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
+    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:15px; line-height:1; padding:8px 12px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); } /* compacter */
     .zd-ok{   color:#065f46; border-color:rgba(16,185,129,.35); background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
     .zd-warn{ color:#7c2d12; border-color:rgba(245,158,11,.4);  background:linear-gradient(180deg,#fef3c7,#fde68a); }
     .zd-bad{  color:#7f1d1d; border-color:rgba(239,68,68,.4);   background:linear-gradient(180deg,#fee2e2,#fecaca); }
     .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
 
-    .zd-cols2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .zd-subcard{ background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:14px; }
-    .zd-subtitle{ font-weight:900; letter-spacing:.2px; color:#064e3b; margin:0 0 10px 0; display:flex; align-items:center; gap:8px; }
-    .zd-pill{ margin-left:auto; font-size:12px; font-weight:800; color:#065f46; padding:4px 10px; border-radius:999px; border:1px solid #c7ead8; background:#e8fff4; }
+    .zd-cols2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; } /* compacter */
+    .zd-subcard{ background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:12px; }
+    .zd-subtitle{ font-weight:900; letter-spacing:.2px; color:#064e3b; margin:0 0 8px 0; display:flex; align-items:center; gap:8px; }
+    .zd-pill{ margin-left:auto; font-size:11px; font-weight:800; color:#065f46; padding:3px 9px; border-radius:999px; border:1px solid #c7ead8; background:#e8fff4; }
+
+    /* Kleine marge op smalle schermen */
+    @media (max-width: 1540px){
+      .zd-frame { width:100%; padding:0 16px; }
+    }
   </style>
 </head>
 <body>
@@ -167,8 +176,8 @@
     const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
 
     /* ====== Data ====== */
-    async function fetchChecklists(){try{const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store"});if(r.ok){const j=await r.json();if(Array.isArray(j.items)){state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);}}}catch(e){console.warn("Checklist fetch fail",e);}}
-    async function fetchPeriodic(){const u=CONFIG.sheets.periodicJson;if(!u)return;try{const sep=u.includes("?")?"&":"?";const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});if(r.ok){const j=await r.json();state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];}}catch(e){console.warn("Periodic fail",e);}}
+    async function fetchChecklists(){try{const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store",mode:"cors"});if(r.ok){const j=await r.json();if(Array.isArray(j.items)){state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);}}}catch(e){console.warn("Checklist fetch fail",e);}}
+    async function fetchPeriodic(){const u=CONFIG.sheets.periodicJson;if(!u)return;try{const sep=u.includes("?")?"&":"?";const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store",mode:"cors"});if(r.ok){const j=await r.json();state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];}}catch(e){console.warn("Periodic fail",e);}}
     async function loadAll(){await Promise.allSettled([fetchChecklists(),fetchPeriodic()]);renderAll();}
 
     /* ====== Render ====== */
@@ -200,26 +209,9 @@
       $("#zd-cntContainers").textContent=cont.length; $("#zd-cntEmballage").textContent=emb.length;
     }
 
-    function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); renderWaste(); fitFrame(); }
+    function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); renderWaste(); }
 
-    /* ====== Perfect passend schalen (met veilige marge) ====== */
-    const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 24; // extra ruimte onder/naast
-    function fitFrame(){
-      const shell = document.getElementById('dashboard-shell');
-      const frame = document.getElementById('zd-frame');
-
-      const viewW = Math.max(1, window.innerWidth  || shell.clientWidth  || document.documentElement.clientWidth);
-      const viewH = Math.max(1, window.innerHeight || shell.clientHeight || document.documentElement.clientHeight);
-
-      const scale = Math.min(
-        (viewW - SAFE_MARGIN_PX) / FRAME_W,
-        (viewH - SAFE_MARGIN_PX) / FRAME_H
-      );
-
-      frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
-    }
-
-    /* ====== Fullscreen via sneltoets 'F' (geen knop) ====== */
+    /* ====== Fullscreen via sneltoets 'F' (scroll blijft werken) ====== */
     async function toggleFS(){
       try{
         if(document.fullscreenElement){
@@ -233,17 +225,11 @@
     }
     document.addEventListener('keydown', (e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
 
-    /* ====== Refit hooks ====== */
-    window.addEventListener('resize', fitFrame);
-    window.addEventListener('orientationchange', fitFrame);
-    document.addEventListener('fullscreenchange', fitFrame);
-    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) fitFrame(); });
-    if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
-
-    /* ====== Init loops ====== */
-    fitFrame(); renderHeader(); loadAll();
-    setInterval(()=>{ renderHeader(); fitFrame(); },1000);
-    setInterval(()=>{ loadAll(); /* fitFrame wordt in renderAll geroepen */ }, CONFIG.refreshMs);
+    /* ====== Loops ====== */
+    renderHeader(); renderAll();
+    setInterval(()=>{ renderHeader(); },1000);
+    setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
+    loadAll();
   })();
   </script>
 </body>
