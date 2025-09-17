@@ -6,25 +6,26 @@
   <title>Zusje Roermond Dashboard</title>
   <style>
     html, body { height:100%; margin:0; }
-    body { background:#000; overflow:hidden; } /* geen scrollbars, we schalen altijd passend */
+    /* Scrollen toestaan op paginaniveau */
+    body { background:#000; overflow:auto; }
 
-    /* Container die het hele venster vult */
+    /* Shell mag ook scrollen (fallback-modus) */
     #dashboard-shell{
-      position:fixed; inset:0;
+      position:relative; /* geen fixed meer: zo kan de pagina scrollen */
+      min-height:100vh;
       background:#f3f6fb;
-      overflow:hidden;
+      overflow:auto;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
-    /* Vast canvas 1600x900 dat we via transform schalen */
-    .zd-stage{ position:relative; width:100%; height:100%; }
+    /* Vast canvas 1600x900 dat we (soms) schalen */
+    .zd-stage{ position:relative; width:100%; min-height:100vh; }
     .zd-frame{
       position:absolute;
-      left:50%; top:50%;
       width:1600px; height:900px; /* design canvas */
-      transform: translate(-50%, -50%) scale(1);
+      /* We wisselen dynamisch tussen center en top-left in JS */
       transform-origin: center center;
-      will-change: transform;
+      will-change: transform, left, top;
     }
 
     /* UI (prefixed met zd-) */
@@ -51,7 +52,7 @@
 
     .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:22px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
     .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
-    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
+    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; } /* interne scroll waar nodig */
 
     .zd-list{ display:flex; flex-direction:column; gap:12px; }
     .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
@@ -72,7 +73,7 @@
 </head>
 <body>
   <div id="dashboard-shell">
-    <div class="zd-stage" id="zd-stage">
+    <div class="zd-stage">
       <div class="zd-frame" id="zd-frame">
         <div class="zd-wrap">
           <div class="zd-header">
@@ -147,49 +148,34 @@
       refreshMs:15000
     };
 
-    /* ====== JSON & JSONP helper ====== */
+    /* ====== JSON/JSONP helper ====== */
     function jsonp(url){
       return new Promise((resolve,reject)=>{
-        const cb = '__zd_cb_' + Math.random().toString(36).slice(2);
-        const s  = document.createElement('script');
-        const to = setTimeout(()=>{ cleanup(); reject(new Error('JSONP timeout')); }, 8000);
-        function cleanup(){ clearTimeout(to); delete window[cb]; if(s && s.parentNode) s.parentNode.removeChild(s); }
-        window[cb] = (data)=>{ cleanup(); resolve(data); };
-        s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
-        s.async = true;
-        s.onerror = ()=>{ cleanup(); reject(new Error('JSONP load error')); };
+        const cb='__zd_cb_'+Math.random().toString(36).slice(2);
+        const s=document.createElement('script');
+        const to=setTimeout(()=>{cleanup();reject(new Error('JSONP timeout'));},8000);
+        function cleanup(){clearTimeout(to);delete window[cb];s.remove();}
+        window[cb]=(data)=>{cleanup();resolve(data);};
+        s.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+        s.async=true;
+        s.onerror=()=>{cleanup();reject(new Error('JSONP load error'));};
         document.head.appendChild(s);
       });
     }
     async function getJSON(url){
-      try{
-        const r = await fetch(url, { cache:'no-store' });
-        if (r.ok) return await r.json();
-      }catch(_){}
-      return await jsonp(url); // fallback (werkt zonder CORS)
+      try{const r=await fetch(url,{cache:'no-store'}); if(r.ok) return await r.json();}catch(_){}
+      return await jsonp(url);
     }
 
     /* ====== State ====== */
-    const state={
-      checklists:[],
-      periodicTasks:[],
-      ordersRules:[
-        {vendor:"Bidfood",weekdays:[2],deadline:"00:00"},
-        {vendor:"Bubbels",weekdays:[3],deadline:"23:00",evenWeeks:true},
-        {vendor:"Zusje Kantoor",weekdays:[3],deadline:"23:00",evenWeeks:true},
-        {vendor:"Bidfood",weekdays:[4],deadline:"00:00"},
-        {vendor:"Bidfood",weekdays:[6],deadline:"00:00"}
-      ],
-      wasteBase:{
-        1:["Bidfood emballage klaarzetten","Glas containers klaarzetten","Gele Zusje kratten klaarzetten"],
-        2:["Restafval containers klaarzetten"],
-        3:["Bidfood emballage klaarzetten"],
-        4:["Papier container klaarzetten"],
-        5:["Bidfood emballage klaarzetten"],
-        0:["Restafval containers klaarzetten"]
-      },
-      thursdayPlastic:"Plastic containers klaarzetten"
-    };
+    const state={checklists:[],periodicTasks:[],ordersRules:[
+      {vendor:"Bidfood",weekdays:[2],deadline:"00:00"},
+      {vendor:"Bubbels",weekdays:[3],deadline:"23:00",evenWeeks:true},
+      {vendor:"Zusje Kantoor",weekdays:[3],deadline:"23:00",evenWeeks:true},
+      {vendor:"Bidfood",weekdays:[4],deadline:"00:00"},
+      {vendor:"Bidfood",weekdays:[6],deadline:"00:00"}],
+      wasteBase:{1:["Bidfood emballage klaarzetten","Glas containers klaarzetten","Gele Zusje kratten klaarzetten"],2:["Restafval containers klaarzetten"],3:["Bidfood emballage klaarzetten"],4:["Papier container klaarzetten"],5:["Bidfood emballage klaarzetten"],0:["Restafval containers klaarzetten"]},
+      thursdayPlastic:"Plastic containers klaarzetten"};
 
     /* ====== Helpers ====== */
     const $=sel=>document.querySelector(sel);
@@ -203,95 +189,29 @@
     /* ====== Data ====== */
     async function fetchChecklists(){
       try{
-        const j = await getJSON(CONFIG.sheets.checklistsJson);
-        if (j && j.ok && Array.isArray(j.items)){
-          state.checklists = j.items.map(it=>({name:String(it.name||'').trim(), done:!!it.done})).filter(x=>x.name);
-        } else {
-          state.checklists = [];
-        }
-      }catch(e){ console.warn("Checklist load fail", e); state.checklists = []; }
+        const j=await getJSON(CONFIG.sheets.checklistsJson);
+        state.checklists = (j && j.ok && Array.isArray(j.items)) ? j.items.map(it=>({name:String(it.name||'').trim(),done:!!it.done})).filter(x=>x.name) : [];
+      }catch(e){ console.warn("Checklist load fail",e); state.checklists=[]; }
     }
     async function fetchPeriodic(){
-      const u = CONFIG.sheets.periodicJson;
-      if(!u) return;
+      const u=CONFIG.sheets.periodicJson; if(!u) return;
       try{
-        const j = await getJSON(u + (u.includes('?')?'&':'?') + 'tz=Europe/Amsterdam');
-        state.periodicTasks = (j && j.ok && Array.isArray(j.items))
-          ? j.items.map(ev => ({ title: ev.title, allDay: !!ev.allDay }))
-          : [];
-      }catch(e){ console.warn("Periodic load fail", e); state.periodicTasks = []; }
+        const j=await getJSON(u+(u.includes('?')?'&':'?')+'tz=Europe/Amsterdam');
+        state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];
+      }catch(e){ console.warn("Periodic load fail",e); state.periodicTasks=[]; }
     }
     async function loadAll(){ await Promise.allSettled([fetchChecklists(),fetchPeriodic()]); renderAll(); }
 
     /* ====== Render ====== */
-    function renderHeader(){
-      const n=new Date(), ops=getOpsDate(n);
-      $("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
-      $("#zd-date").textContent=fmtDutchDate(ops);
-    }
-    function renderChecklists(){
-      const list=$("#zd-checklistList"); list.innerHTML="";
-      if(!state.checklists.length){
-        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`;
-        return;
-      }
-      state.checklists.forEach(c=>{
-        const el=document.createElement("div"); el.className="zd-item";
-        el.innerHTML=`<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;
-        list.appendChild(el);
-      });
-    }
-    function renderPeriodic(){
-      const list=$("#zd-periodicList"); list.innerHTML="";
-      const t=state.periodicTasks||[];
-      if(!t.length){
-        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div><div>${chip("open","—")}</div></div>`;
-        return;
-      }
-      t.forEach(x=>{
-        const el=document.createElement("div"); el.className="zd-item";
-        el.innerHTML=`<div class="zd-name">${x.title}</div><div>${chip("ok","Inplannen/Check")}</div>`;
-        list.appendChild(el);
-      });
-    }
-    function renderOrders(){
-      const wrap=$("#zd-ordersList"); wrap.innerHTML="";
-      const n=new Date(), ops=getOpsDate(n), dow=ops.getDay(), even=isEvenWeek(ops);
-      const td=state.ordersRules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));
-      if(!td.length){
-        wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div><div>${chip("open","—")}</div></div>`;
-        return;
-      }
-      td.forEach(r=>{
-        let limit=new Date(ops);
-        if(r.deadline==="00:00"){ limit.setDate(limit.getDate()+1); limit.setHours(0,0,0,0); }
-        else{ const [h,m]=(r.deadline||"23:59").split(":").map(Number); limit.setHours(h,m||0,0,0); }
-        const diff=Math.round((limit-n)/60000);
-        let type="open",lab=`vóór ${r.deadline}`;
-        if(diff<0){ type="bad"; lab="Te laat"; }
-        else if(diff<=60){ type="warn"; lab=`Binnen ${diff}m`; }
-        const el=document.createElement("div"); el.className="zd-item";
-        el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div><div>${chip(type,type==="open"?"Doen":lab)}</div>`;
-        wrap.appendChild(el);
-      });
-    }
+    function renderHeader(){const n=new Date(),ops=getOpsDate(n);$("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;$("#zd-date").textContent=fmtDutchDate(ops);}
+    function renderChecklists(){const list=$("#zd-checklistList");list.innerHTML="";if(!state.checklists.length){list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`;return;}state.checklists.forEach(c=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;list.appendChild(el);});}
+    function renderPeriodic(){const list=$("#zd-periodicList");list.innerHTML="";const t=state.periodicTasks||[];if(!t.length){list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div><div>${chip("open","—")}</div></div>`;return;}t.forEach(x=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${x.title}</div><div>${chip("ok","Inplannen/Check")}</div>`;list.appendChild(el);});}
+    function renderOrders(){const wrap=$("#zd-ordersList");wrap.innerHTML="";const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);const td=state.ordersRules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));if(!td.length){wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div><div>${chip("open","—")}</div></div>`;return;}td.forEach(r=>{let limit=new Date(ops);if(r.deadline==="00:00"){limit.setDate(limit.getDate()+1);limit.setHours(0,0,0,0);}else{const [h,m]=(r.deadline||"23:59").split(":").map(Number);limit.setHours(h,m||0,0,0);}const diff=Math.round((limit-n)/60000);let type="open",lab=`vóór ${r.deadline}`;if(diff<0){type="bad";lab="Te laat";}else if(diff<=60){type="warn";lab=`Binnen ${diff}m`;}const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div><div>${chip(type,type==="open"?"Doen":lab)}</div>`;wrap.appendChild(el);});}
     function renderWaste(){
-      const ops=getOpsDate(new Date()), dow=ops.getDay();
-      let list = state.wasteBase[dow] ? [...state.wasteBase[dow]] : [];
-      if(dow===4 && weekNumber(ops)%2===0){
-        if(state.thursdayPlastic && !list.includes(state.thursdayPlastic)) list.push(state.thursdayPlastic);
-      }
-      const cont=[], emb=[];
-      list.forEach(n=>{
-        const s=n.toLowerCase();
-        const isC=/container|restafval|papier|plastic|pm[dr]|glas/.test(s);
-        const isE=/emballage|krat|kratten|fust|fusten|bidfood|zusje/.test(s);
-        if(isC && !isE) cont.push(n);
-        else if(isE && !isC) emb.push(n);
-        else cont.push(n);
-      });
-      const lc=$("#zd-wasteContainers"), le=$("#zd-wasteEmballage");
-      lc.innerHTML=""; le.innerHTML="";
+      const ops=getOpsDate(new Date()), dow=ops.getDay(); let list = state.wasteBase[dow] ? [...state.wasteBase[dow]] : [];
+      if(dow===4 && weekNumber(ops)%2===0){ if(state.thursdayPlastic && !list.includes(state.thursdayPlastic)) list.push(state.thursdayPlastic); }
+      const cont=[], emb=[]; list.forEach(n=>{const s=n.toLowerCase(); const isC=/container|restafval|papier|plastic|pm[dr]|glas/.test(s); const isE=/emballage|krat|kratten|fust|fusten|bidfood|zusje/.test(s); if(isC&&!isE)cont.push(n); else if(isE&&!isC)emb.push(n); else cont.push(n);});
+      const lc=$("#zd-wasteContainers"), le=$("#zd-wasteEmballage"); lc.innerHTML=""; le.innerHTML="";
       if(!cont.length) lc.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
       if(!emb.length)  le.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
       cont.forEach(n=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;lc.appendChild(el);});
@@ -301,33 +221,43 @@
 
     function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); renderWaste(); fitFrame(); }
 
-    /* ====== Perfect passend schalen (reageert op zoom & fullscreen) ====== */
-    const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 16; // iets kleinere marge
-    let lastDPR = window.devicePixelRatio;
+    /* ====== Schaal + Scroll logica ====== */
+    const FRAME_W=1600, FRAME_H=900, SAFE=8; // mini marge
+    const MIN_SCALE=0.90; // we schalen alleen licht; daaronder liever scroll
 
-    function getViewportSize(){
-      // visualViewport is het meest betrouwbaar bij zoom
-      if (window.visualViewport) {
-        return { w: window.visualViewport.width, h: window.visualViewport.height };
-      }
-      // fallback
+    function viewportSize(){
+      if (window.visualViewport) return { w: window.visualViewport.width, h: window.visualViewport.height };
       return { w: window.innerWidth, h: window.innerHeight };
     }
 
     function fitFrame(){
-      const frame = document.getElementById('zd-frame');
-      const { w, h } = getViewportSize();
+      const frame=document.getElementById('zd-frame');
+      const {w,h}=viewportSize();
+      const fitScale=Math.min((w-SAFE)/FRAME_W,(h-SAFE)/FRAME_H);
 
-      // maak een klein beetje ruimte (SAFE_MARGIN_PX) zodat niets afvalt
-      const scale = Math.max(0.1, Math.min(
-        (w - SAFE_MARGIN_PX) / FRAME_W,
-        (h - SAFE_MARGIN_PX) / FRAME_H
-      ));
-
-      frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      if (fitScale >= 1){
+        // Genoeg ruimte → geen schaal, centreer
+        frame.style.left = '50%';
+        frame.style.top  = '50%';
+        frame.style.transformOrigin='center center';
+        frame.style.transform = 'translate(-50%, -50%) scale(1)';
+      } else if (fitScale >= MIN_SCALE){
+        // Iets kleiner → licht schalen, centreer
+        frame.style.left = '50%';
+        frame.style.top  = '50%';
+        frame.style.transformOrigin='center center';
+        frame.style.transform = `translate(-50%, -50%) scale(${fitScale})`;
+      } else {
+        // Te klein (of sterk ingezoomd) → geen schaal, top-left en scrollen
+        frame.style.left = '0';
+        frame.style.top  = '0';
+        frame.style.transformOrigin='top left';
+        frame.style.transform = 'scale(1)';
+        // Shell heeft overflow:auto, dus je kunt scrollen om alles te zien
+      }
     }
 
-    // Refit bij allerlei situaties (zoom, fullscreen, resize, fonts geladen, etc.)
+    // Refit bij relevante events
     window.addEventListener('resize', fitFrame);
     window.addEventListener('orientationchange', fitFrame);
     document.addEventListener('fullscreenchange', fitFrame);
@@ -337,32 +267,19 @@
     }
     if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
 
-    // Watch op devicePixelRatio (detecteert zoom op sommige browsers)
-    setInterval(()=>{
-      if (window.devicePixelRatio !== lastDPR){
-        lastDPR = window.devicePixelRatio;
-        fitFrame();
-      }
-    }, 400);
-
-    /* ====== Fullscreen via sneltoets 'F' ====== */
+    /* ====== Fullscreen via sneltoets 'F' (optioneel) ====== */
     async function toggleFS(){
       try{
-        if(document.fullscreenElement){
-          await document.exitFullscreen();
-        }else{
-          const el = document.getElementById('dashboard-shell');
-          if(el.requestFullscreen) await el.requestFullscreen();
-          else if(document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
-        }
+        if(document.fullscreenElement){ await document.exitFullscreen(); }
+        else{ const el=document.documentElement; if(el.requestFullscreen) await el.requestFullscreen(); }
       }catch(_){}
     }
-    document.addEventListener('keydown', (e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
+    document.addEventListener('keydown',(e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
 
     /* ====== Init loops ====== */
     fitFrame(); renderHeader(); loadAll();
-    setInterval(()=>{ renderHeader(); /* klok */ },1000);
-    setInterval(()=>{ loadAll(); /* data refresh */ }, CONFIG.refreshMs);
+    setInterval(()=>{ renderHeader(); },1000);
+    setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
   })();
   </script>
 </body>
