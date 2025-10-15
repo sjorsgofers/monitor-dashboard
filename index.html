@@ -6,14 +6,14 @@
   <title>Zusje Roermond Dashboard</title>
   <style>
     html, body { height:100%; margin:0; }
-    /* Scroll toestaan: als content net hoger is dan viewport kun je scrollen */
+    /* Scroll toegestaan, zodat je nooit content verliest */
     body { background:#000; overflow:auto; }
 
-    /* Vult altijd het hele venster */
+    /* Vult altijd het venster */
     #dashboard-shell{
       position:relative; min-height:100vh;
       background:#f3f6fb;
-      overflow:hidden;
+      overflow:auto;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
@@ -21,10 +21,10 @@
     .zd-stage{ position:relative; width:100%; height:100%; }
     .zd-frame{
       position:absolute;
-      left:50%; top:0;                /* ⬅ veranker bovenaan */
+      left:50%; top:50%;
       width:1600px; height:900px;
-      transform: translate(-50%, 0) scale(1);  /* ⬅ niet meer -50% verticaal */
-      transform-origin: top center;           /* ⬅ schaal vanaf de bovenkant */
+      transform: translate(-50%, -50%) scale(1);
+      transform-origin: center center;
       will-change: transform;
     }
 
@@ -38,10 +38,11 @@
 
     .zd-grid{ display:grid; gap:24px; grid-template-columns:repeat(12,1fr); height:calc(100% - 110px); }
     .zd-col-4{ grid-column:span 4; }
+    .zd-col-12{ grid-column:span 12; }
 
-    .zd-colstack{ display:flex; flex-direction:column; gap:24px; height:100%; }
-    .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); display:flex; flex:1; }
-    .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; width:100%; }
+    .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); }
+    .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
+    .zd-card + .zd-card{ margin-top:16px; } /* cards onder elkaar in dezelfde kolom */
     .zd-band{ height:10px; width:100%; }
     .zd-band-check{  background:linear-gradient(90deg,#2563eb,#7ea5ff); }
     .zd-band-period{ background:linear-gradient(90deg,#0ea5a4,#8cf2e8); }
@@ -62,6 +63,10 @@
     .zd-warn{ color:#7c2d12; border-color:rgba(245,158,11,.4);  background:linear-gradient(180deg,#fef3c7,#fde68a); }
     .zd-bad{  color:#7f1d1d; border-color:rgba(239,68,68,.4);   background:linear-gradient(180deg,#fee2e2,#fecaca); }
     .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
+
+    /* Kleine typografische compactheid zodat alles net wat beter past */
+    .zd-card-b .zd-item .zd-name{ font-size:18px; }
+    .zd-card-h{ font-size:20px; }
   </style>
 </head>
 <body>
@@ -80,59 +85,58 @@
             </div>
           </div>
 
+          <!-- NIEUWE GRID: 3 kolommen van elk 4/12 -->
           <div class="zd-grid">
             <!-- Kolom 1: Checklisten -->
-            <div class="zd-col-4">
-              <div class="zd-panel">
-                <section class="zd-card">
-                  <div class="zd-band zd-band-check"></div>
-                  <div class="zd-card-h">Checklisten <span class="zd-tag">Team</span></div>
-                  <div class="zd-card-b"><div class="zd-list" id="zd-checklistList"></div></div>
-                </section>
-              </div>
+            <div class="zd-panel zd-col-4">
+              <section class="zd-card">
+                <div class="zd-band zd-band-check"></div>
+                <div class="zd-card-h">Checklisten <span class="zd-tag">Team</span></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-checklistList"></div>
+                </div>
+              </section>
             </div>
 
-            <!-- Kolom 2: Containers + Emballage (onder elkaar) -->
-            <div class="zd-col-4">
-              <div class="zd-colstack">
-                <div class="zd-panel">
-                  <section class="zd-card">
-                    <div class="zd-band zd-band-waste"></div>
-                    <div class="zd-card-h">Containers (vandaag) <span class="zd-tag"><span id="zd-cntContainers">0</span> st.</span></div>
-                    <div class="zd-card-b"><div class="zd-list" id="zd-wasteContainers"></div></div>
-                  </section>
+            <!-- Kolom 2: Containers (boven) + Emballage (onder) -->
+            <div class="zd-panel zd-col-4">
+              <section class="zd-card">
+                <div class="zd-band zd-band-waste"></div>
+                <div class="zd-card-h">Containers <span class="zd-tag">Buiten</span></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-wasteContainers"></div>
                 </div>
-                <div class="zd-panel">
-                  <section class="zd-card">
-                    <div class="zd-band zd-band-waste"></div>
-                    <div class="zd-card-h">Emballage (vandaag) <span class="zd-tag"><span id="zd-cntEmballage">0</span> st.</span></div>
-                    <div class="zd-card-b"><div class="zd-list" id="zd-wasteEmballage"></div></div>
-                  </section>
+              </section>
+
+              <section class="zd-card">
+                <div class="zd-band zd-band-waste"></div>
+                <div class="zd-card-h">Emballage <span class="zd-tag">Buiten</span></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-wasteEmballage"></div>
                 </div>
-              </div>
+              </section>
             </div>
 
-            <!-- Kolom 3: Periodiek + Bestellen (onder elkaar) -->
-            <div class="zd-col-4">
-              <div class="zd-colstack">
-                <div class="zd-panel">
-                  <section class="zd-card">
-                    <div class="zd-band zd-band-period"></div>
-                    <div class="zd-card-h">Periodieke taken (vandaag) <span class="zd-tag">Schema</span></div>
-                    <div class="zd-card-b"><div class="zd-list" id="zd-periodicList"></div></div>
-                  </section>
+            <!-- Kolom 3: Periodieke taken (boven) + Bestellen (onder) -->
+            <div class="zd-panel zd-col-4">
+              <section class="zd-card">
+                <div class="zd-band zd-band-period"></div>
+                <div class="zd-card-h">Periodieke taken (vandaag) <span class="zd-tag">Schema</span></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-periodicList"></div>
                 </div>
-                <div class="zd-panel">
-                  <section class="zd-card">
-                    <div class="zd-band zd-band-orders"></div>
-                    <div class="zd-card-h">Bestellen (vandaag) <span class="zd-tag">Deadlines</span></div>
-                    <div class="zd-card-b"><div class="zd-list" id="zd-ordersList"></div></div>
-                  </section>
-                </div>
-              </div>
-            </div>
+              </section>
 
-          </div><!-- /grid -->
+              <section class="zd-card">
+                <div class="zd-band zd-band-orders"></div>
+                <div class="zd-card-h">Bestellen (vandaag) <span class="zd-tag">Deadlines</span></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-ordersList"></div>
+                </div>
+              </section>
+            </div>
+          </div>
+          <!-- /grid -->
         </div>
       </div>
     </div>
@@ -140,24 +144,31 @@
 
   <script>
   (function(){
-    /* ====== Config ====== */
+    /* ====== Config: 3 aparte endpoints ====== */
     const CONFIG = {
       sheets:{
+        // Checklisten-status (jouw werkende endpoint)
         checklistsJson:"https://script.google.com/macros/s/AKfycbw_Tn0z0s3AJ7CARzHt9sFy8CGhrCe_HzS9ao0KKDtgzq9TR_H-28WBss316I6PDcr7/exec",
-        periodicJson:"https://script.google.com/macros/s/AKfycbxEDSHzBOrrYqkNOCQI6clM6DNuoge55tdATn1XNC63HT7GgPcsZF5AT3dwfaLjEUmV/exec"
+        // Periodieke taken (aparte agenda + eigen Apps Script)
+        periodicJson:"https://script.google.com/macros/s/AKfycbxEDSHzBOrrYqkNOCQI6clM6DNuoge55tdATn1XNC63HT7GgPcsZF5AT3dwfaLjEUmV/exec",
+        // Containers & Emballage (aparte agenda + eigen Apps Script)
+        containersJson:"https://script.google.com/macros/s/AKfycbwPQ1WsRqrJmRuYD8bL6kz5H5sSDNcBsIa0z-WW4hain7fkVhM6HIUQI3DHyhpn-C1zHQ/exec"
       },
       refreshMs:15000
     };
 
     /* ====== State ====== */
-    const state={checklists:[],periodicTasks:[],ordersRules:[
-      {vendor:"Bidfood",weekdays:[2],deadline:"00:00"},
-      {vendor:"Bubbels",weekdays:[3],deadline:"23:00",evenWeeks:true},
-      {vendor:"Zusje Kantoor",weekdays:[3],deadline:"23:00",evenWeeks:true},
-      {vendor:"Bidfood",weekdays:[4],deadline:"00:00"},
-      {vendor:"Bidfood",weekdays:[6],deadline:"00:00"}],
-      wasteBase:{1:["Bidfood emballage klaarzetten","Glas containers klaarzetten","Gele Zusje kratten klaarzetten"],2:["Restafval containers klaarzetten"],3:["Bidfood emballage klaarzetten"],4:["Papier container klaarzetten"],5:["Bidfood emballage klaarzetten"],0:["Restafval containers klaarzetten"]},
-      thursdayPlastic:"Plastic containers klaarzetten"};
+    const state={
+      checklists:[],
+      periodicTasks:[],
+      ordersRules:[
+        {vendor:"Bidfood",weekdays:[2],deadline:"00:00"},
+        {vendor:"Bubbels",weekdays:[3],deadline:"23:00",evenWeeks:true},
+        {vendor:"Zusje Kantoor",weekdays:[3],deadline:"23:00",evenWeeks:true},
+        {vendor:"Bidfood",weekdays:[4],deadline:"00:00"},
+        {vendor:"Bidfood",weekdays:[6],deadline:"00:00"}
+      ]
+    };
 
     /* ====== Helpers ====== */
     const $=sel=>document.querySelector(sel);
@@ -169,42 +180,127 @@
     const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
 
     /* ====== Data ====== */
-    async function fetchChecklists(){try{const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store"});if(r.ok){const j=await r.json();if(Array.isArray(j.items)){state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);}}}catch(e){console.warn("Checklist fetch fail",e);}}
-    async function fetchPeriodic(){const u=CONFIG.sheets.periodicJson;if(!u)return;try{const sep=u.includes("?")?"&":"?";const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});if(r.ok){const j=await r.json();state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];}}catch(e){console.warn("Periodic fail",e);}}
-    async function loadAll(){await Promise.allSettled([fetchChecklists(),fetchPeriodic()]);renderAll();}
-
-    /* ====== Render ====== */
-    function renderHeader(){const n=new Date(),ops=getOpsDate(n);$("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;$("#zd-date").textContent=fmtDutchDate(ops);}
-    function renderChecklists(){const list=$("#zd-checklistList");list.innerHTML="";if(!state.checklists.length){list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`;return;}state.checklists.forEach(c=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;list.appendChild(el);});}
-    function renderPeriodic(){const list=$("#zd-periodicList");list.innerHTML="";const t=state.periodicTasks||[];if(!t.length){list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div><div>${chip("open","—")}</div></div>`;return;}t.forEach(x=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${x.title}</div><div>${chip("ok","Inplannen/Check")}</div>`;list.appendChild(el);});}
-    function renderOrders(){const wrap=$("#zd-ordersList");wrap.innerHTML="";const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);const td=state.ordersRules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));if(!td.length){wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div><div>${chip("open","—")}</div></div>`;return;}td.forEach(r=>{let limit=new Date(ops);if(r.deadline==="00:00"){limit.setDate(limit.getDate()+1);limit.setHours(0,0,0,0);}else{const [h,m]=(r.deadline||"23:59").split(":").map(Number);limit.setHours(h,m||0,0,0);}const diff=Math.round((limit-n)/60000);let type="open",lab=`vóór ${r.deadline}`;if(diff<0){type="bad";lab="Te laat";}else if(diff<=60){type="warn";lab=`Binnen ${diff}m`;}const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div><div>${chip(type,type==="open"?"Doen":lab)}</div>`;wrap.appendChild(el);});}
-    function renderWaste(){
-      const ops=getOpsDate(new Date()), dow=ops.getDay();
-      let list = state.wasteBase[dow] ? [...state.wasteBase[dow]] : [];
-      if(dow===4 && weekNumber(ops)%2===0){
-        if(state.thursdayPlastic && !list.includes(state.thursdayPlastic)) list.push(state.thursdayPlastic);
-      }
-      const cont=[], emb=[];
-      list.forEach(n=>{
-        const s=n.toLowerCase();
-        const isC=/container|restafval|papier|plastic|pm[dr]|glas/.test(s);
-        const isE=/emballage|krat|kratten|fust|fusten|bidfood|zusje/.test(s);
-        if(isC && !isE) cont.push(n);
-        else if(isE && !isC) emb.push(n);
-        else cont.push(n);
-      });
-      const lc=$("#zd-wasteContainers"), le=$("#zd-wasteEmballage");
-      lc.innerHTML=""; le.innerHTML="";
-      if(!cont.length) lc.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
-      if(!emb.length)  le.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
-      cont.forEach(n=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;lc.appendChild(el);});
-      emb.forEach(n=>{const el=document.createElement("div");el.className="zd-item";el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;le.appendChild(el);});
-      $("#zd-cntContainers").textContent=cont.length; $("#zd-cntEmballage").textContent=emb.length;
+    async function fetchChecklists(){
+      try{
+        const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store"});
+        if(r.ok){
+          const j=await r.json();
+          if(Array.isArray(j.items)){
+            state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);
+          }
+        }
+      }catch(e){ console.warn("Checklist fetch fail",e); }
     }
 
-    function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); renderWaste(); fitFrame(); }
+    async function fetchPeriodic(){
+      const u=CONFIG.sheets.periodicJson;
+      if(!u) return;
+      try{
+        const sep=u.includes("?")?"&":"?";
+        const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});
+        if(r.ok){
+          const j=await r.json();
+          state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[];
+        }
+      }catch(e){ console.warn("Periodic fail",e); }
+    }
 
-    /* ====== Perfect passend schalen (met veilige marge) ====== */
+    // Containers & Emballage uit jouw aparte Web App
+    async function fetchWaste(){
+      const u=CONFIG.sheets.containersJson;
+      if(!u) return;
+      try{
+        const sep=u.includes("?")?"&":"?";
+        const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        const j=await r.json();
+        const containers = Array.isArray(j.containers)? j.containers : [];
+        const emballage  = Array.isArray(j.emballage) ? j.emballage  : [];
+
+        const lc=$("#zd-wasteContainers");
+        const le=$("#zd-wasteEmballage");
+
+        lc.innerHTML = containers.length
+          ? containers.map(n=>`<div class="zd-item"><div class="zd-name">${n}</div><div class="zd-chip zd-ok">Klaarzetten</div></div>`).join("")
+          : `<div class="zd-item"><div class="zd-name">—</div><div class="zd-chip zd-open">Geen</div></div>`;
+
+        le.innerHTML = emballage.length
+          ? emballage.map(n=>`<div class="zd-item"><div class="zd-name">${n}</div><div class="zd-chip zd-ok">Klaarzetten</div></div>`).join("")
+          : `<div class="zd-item"><div class="zd-name">—</div><div class="zd-chip zd-open">Geen</div></div>`;
+      }catch(e){ console.warn("Containers/Emballage fetch fail",e); }
+    }
+
+    async function loadAll(){
+      await Promise.allSettled([fetchChecklists(),fetchPeriodic(),fetchWaste()]);
+      renderAll();
+    }
+
+    /* ====== Render ====== */
+    function renderHeader(){
+      const n=new Date(),ops=getOpsDate(n);
+      $("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+      $("#zd-date").textContent=fmtDutchDate(ops);
+    }
+
+    function renderChecklists(){
+      const list=$("#zd-checklistList");
+      list.innerHTML="";
+      if(!state.checklists.length){
+        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`;
+        return;
+      }
+      state.checklists.forEach(c=>{
+        const el=document.createElement("div");
+        el.className="zd-item";
+        el.innerHTML=`<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;
+        list.appendChild(el);
+      });
+    }
+
+    function renderPeriodic(){
+      const list=$("#zd-periodicList");
+      list.innerHTML="";
+      const t=state.periodicTasks||[];
+      if(!t.length){
+        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div><div>${chip("open","—")}</div></div>`;
+        return;
+      }
+      t.forEach(x=>{
+        const el=document.createElement("div");
+        el.className="zd-item";
+        const when = x.allDay ? "<em>— hele dag</em>" : "";
+        el.innerHTML=`<div class="zd-name">${x.title} ${when}</div><div>${chip("ok","Inplannen/Check")}</div>`;
+        list.appendChild(el);
+      });
+    }
+
+    function renderOrders(){
+      const wrap=$("#zd-ordersList");
+      wrap.innerHTML="";
+      const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);
+      const td=state.ordersRules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));
+      if(!td.length){
+        wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div><div>${chip("open","—")}</div></div>`;
+        return;
+      }
+      td.forEach(r=>{
+        let limit=new Date(ops);
+        if(r.deadline==="00:00"){limit.setDate(limit.getDate()+1);limit.setHours(0,0,0,0);}
+        else{const [h,m]=(r.deadline||"23:59").split(":").map(Number);limit.setHours(h,m||0,0,0);}
+        const diff=Math.round((limit-n)/60000);
+        let type="open",lab=`vóór ${r.deadline}`;
+        if(diff<0){type="bad";lab="Te laat";}
+        else if(diff<=60){type="warn";lab=`Binnen ${diff}m`;}
+        const el=document.createElement("div");
+        el.className="zd-item";
+        el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div><div>${chip(type,type==="open"?"Doen":lab)}</div>`;
+        wrap.appendChild(el);
+      });
+    }
+
+    function renderAll(){ renderHeader(); renderChecklists(); renderPeriodic(); renderOrders(); fitFrame(); }
+
+    /* ====== Perfect passend schalen (met veilige marge) + scroll fallback ====== */
     const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 24;
     function fitFrame(){
       const shell = document.getElementById('dashboard-shell');
@@ -218,15 +314,14 @@
         (viewH - SAFE_MARGIN_PX) / FRAME_H
       );
 
-      frame.style.transform = `translate(-50%, 0) scale(${scale})`;  /* ⬅ top blijft zichtbaar */
+      frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
 
     /* ====== Fullscreen via sneltoets 'F' (geen knop) ====== */
     async function toggleFS(){
       try{
-        if(document.fullscreenElement){
-          await document.exitFullscreen();
-        }else{
+        if(document.fullscreenElement){ await document.exitFullscreen(); }
+        else{
           const el = document.getElementById('dashboard-shell');
           if(el.requestFullscreen) await el.requestFullscreen();
           else if(document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
@@ -245,7 +340,7 @@
     /* ====== Init loops ====== */
     fitFrame(); renderHeader(); loadAll();
     setInterval(()=>{ renderHeader(); fitFrame(); },1000);
-    setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
+    setInterval(()=>{ loadAll(); /* fitFrame wordt in renderAll geroepen */ }, CONFIG.refreshMs);
   })();
   </script>
 </body>
