@@ -4,60 +4,67 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Zusje Roermond Dashboard</title>
+
+  <!-- Versnelt TLS-handshake naar Apps Script -->
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="dns-prefetch" href="https://script.google.com">
+
   <style>
-    html, body { height:100%; margin:0; background:#000; overflow:auto; }
-    #dashboard-shell{
-      position:relative;
-      width:100%;
-      min-height:100vh;
-      background:#f3f6fb;
-      overflow:auto;
-      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-    }
-    .zd-stage{ position:relative; width:100%; height:100%; display:flex; justify-content:center; align-items:center; }
-    .zd-frame{
-      width:1600px;
-      height:900px;
-      transform-origin:center top;
-      transform:scale(1);
-      transition:transform 0.2s ease;
-    }
+    html, body { height:100%; margin:0; background:#000; }
+    body { overflow:auto; }
+
+    #dashboard-shell{ position:relative; width:100%; min-height:100vh; background:#f3f6fb;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial; }
+
+    .zd-stage{ position:relative; width:100%; min-height:100vh; display:flex; justify-content:center; }
+    .zd-frame{ width:1600px; height:900px; transform-origin:center top; transform:scale(1); transition:transform .15s ease; }
     .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
 
-    /* Titel + header */
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
-    .zd-title{ font-weight:900; font-size:44px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .zd-title{ font-weight:900; font-size:44px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4);
+      -webkit-background-clip:text; background-clip:text; color:transparent; }
     .zd-meta{ color:#60708d; font-size:18px; margin-top:8px; }
     .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:42px; color:#0f172a; text-align:right; }
     .zd-date{ color:#60708d; font-size:18px; text-align:right; }
 
-    /* Grid */
     .zd-grid{ display:grid; gap:24px; grid-template-columns:repeat(12,1fr); height:calc(100% - 110px); }
     .zd-col-4{ grid-column:span 4; }
-    .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); }
-    .zd-card{ background:#fff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
+
+    .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:22px; padding:12px; box-shadow:0 12px 28px rgba(15,23,42,.08); }
+    .zd-card{ background:#fff; border:1px solid #e5e7eb; border-radius:18px; box-shadow:0 8px 20px rgba(15,23,42,.08);
+      display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
     .zd-card + .zd-card{ margin-top:16px; }
 
-    .zd-band{ height:10px; width:100%; }
-    .zd-band-check{ background:linear-gradient(90deg,#2563eb,#7ea5ff); }
+    .zd-band{ height:8px; width:100%; }
+    .zd-band-check{  background:linear-gradient(90deg,#2563eb,#7ea5ff); }
     .zd-band-period{ background:linear-gradient(90deg,#0ea5a4,#8cf2e8); }
     .zd-band-orders{ background:linear-gradient(90deg,#f59e0b,#ffe29a); }
-    .zd-band-waste{ background:linear-gradient(90deg,#16a34a,#a7f3d0); }
+    .zd-band-waste{  background:linear-gradient(90deg,#16a34a,#a7f3d0); }
 
-    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:22px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
-    .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
-    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
+    .zd-card-h{ padding:14px 16px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:20px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff);
+      display:flex; align-items:center; gap:10px; }
+    .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:4px 10px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
+    .zd-card-b{ padding:16px; gap:12px; display:flex; flex-direction:column; flex:1; overflow:auto; }
 
-    .zd-list{ display:flex; flex-direction:column; gap:12px; }
-    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
+    .zd-list{ display:flex; flex-direction:column; gap:10px; }
+    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:12px 14px; border-radius:12px; border:1px solid #e5e7eb; }
     .zd-name{ font-weight:800; letter-spacing:.2px; font-size:18px; color:#0b1220; }
     .zd-name em{ font-style:normal; color:#64748b; font-weight:700; }
 
-    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:16px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
-    .zd-ok{ color:#065f46; border-color:rgba(16,185,129,.35); background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
-    .zd-warn{ color:#7c2d12; border-color:rgba(245,158,11,.4); background:linear-gradient(180deg,#fef3c7,#fde68a); }
-    .zd-bad{ color:#7f1d1d; border-color:rgba(239,68,68,.4); background:linear-gradient(180deg,#fee2e2,#fecaca); }
-    .zd-open{ color:#023047; border-color:rgba(6,182,212,.35); background:linear-gradient(180deg,#cffafe,#bae6fd); }
+    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:14px; line-height:1; padding:8px 12px; border-radius:999px; border:1px solid transparent; box-shadow:0 4px 10px rgba(0,0,0,.05); }
+    .zd-ok{   color:#065f46; border-color:rgba(16,185,129,.35); background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
+    .zd-warn{ color:#7c2d12; border-color:rgba(245,158,11,.4);  background:linear-gradient(180deg,#fef3c7,#fde68a); }
+    .zd-bad{  color:#7f1d1d; border-color:rgba(239,68,68,.4);   background:linear-gradient(180deg,#fee2e2,#fecaca); }
+    .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
+
+    /* Skeletons voor instant weergave */
+    .skeleton{ position:relative; overflow:hidden; background:#eef2f7; border-radius:10px; height:44px; border:1px solid #e5e7eb; }
+    .skeleton::after{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.6) 50%, rgba(255,255,255,0) 100%);
+      transform:translateX(-100%); animation:shimmer 1.2s infinite;
+    }
+    @keyframes shimmer{ 100% { transform:translateX(100%); } }
   </style>
 </head>
 <body>
@@ -76,41 +83,65 @@
             </div>
           </div>
 
-          <!-- GRID 3 kolommen -->
+          <!-- 3 kolommen layout -->
           <div class="zd-grid">
+            <!-- Kolom 1: Checklisten -->
             <div class="zd-panel zd-col-4">
               <section class="zd-card">
                 <div class="zd-band zd-band-check"></div>
                 <div class="zd-card-h">Checklisten <span class="zd-tag">Team</span></div>
-                <div class="zd-card-b"><div class="zd-list" id="zd-checklistList"></div></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-checklistList">
+                    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+                  </div>
+                </div>
               </section>
             </div>
 
+            <!-- Kolom 2: Containers + Emballage -->
             <div class="zd-panel zd-col-4">
               <section class="zd-card">
                 <div class="zd-band zd-band-waste"></div>
                 <div class="zd-card-h">Containers <span class="zd-tag">Buiten</span></div>
-                <div class="zd-card-b"><div class="zd-list" id="zd-wasteContainers"></div></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-wasteContainers">
+                    <div class="skeleton"></div><div class="skeleton"></div>
+                  </div>
+                </div>
               </section>
               <section class="zd-card">
                 <div class="zd-band zd-band-waste"></div>
                 <div class="zd-card-h">Emballage <span class="zd-tag">Buiten</span></div>
-                <div class="zd-card-b"><div class="zd-list" id="zd-wasteEmballage"></div></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-wasteEmballage">
+                    <div class="skeleton"></div>
+                  </div>
+                </div>
               </section>
             </div>
 
+            <!-- Kolom 3: Periodiek + Bestellen -->
             <div class="zd-panel zd-col-4">
               <section class="zd-card">
                 <div class="zd-band zd-band-period"></div>
                 <div class="zd-card-h">Periodieke taken (vandaag) <span class="zd-tag">Schema</span></div>
-                <div class="zd-card-b"><div class="zd-list" id="zd-periodicList"></div></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-periodicList">
+                    <div class="skeleton"></div><div class="skeleton"></div>
+                  </div>
+                </div>
               </section>
               <section class="zd-card">
                 <div class="zd-band zd-band-orders"></div>
                 <div class="zd-card-h">Bestellen (vandaag) <span class="zd-tag">Deadlines</span></div>
-                <div class="zd-card-b"><div class="zd-list" id="zd-ordersList"></div></div>
+                <div class="zd-card-b">
+                  <div class="zd-list" id="zd-ordersList">
+                    <div class="skeleton"></div>
+                  </div>
+                </div>
               </section>
             </div>
+
           </div>
         </div>
       </div>
@@ -119,21 +150,23 @@
 
   <script>
   (function(){
+    /* ============ Config ============ */
     const CONFIG = {
       sheets:{
         checklistsJson:"https://script.google.com/macros/s/AKfycbw_Tn0z0s3AJ7CARzHt9sFy8CGhrCe_HzS9ao0KKDtgzq9TR_H-28WBss316I6PDcr7/exec",
         periodicJson:"https://script.google.com/macros/s/AKfycbxEDSHzBOrrYqkNOCQI6clM6DNuoge55tdATn1XNC63HT7GgPcsZF5AT3dwfaLjEUmV/exec",
         containersJson:"https://script.google.com/macros/s/AKfycbwPQ1WsRqrJmRuYD8bL6kz5H5sSDNcBsIa0z-WW4hain7fkVhM6HIUQI3DHyhpn-C1zHQ/exec"
       },
-      refreshMs:15000
+      refreshMs: 15000,
+      fetchTimeoutMs: 6000,           // na 6s valt fetch terug op cache
+      cacheTtlMs: 5 * 60 * 1000       // 5 min cache “vers”
     };
 
-    const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 24;
+    /* ============ Sizing (sneller, minder reflow) ============ */
+    const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 16;
     const frame = document.getElementById('zd-frame');
-
-    function fitFrame(){
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+    function fitFrameNow(){
+      const vw = window.innerWidth, vh = window.innerHeight;
       const scale = Math.min(
         (vw - SAFE_MARGIN_PX) / FRAME_W,
         (vh - SAFE_MARGIN_PX) / FRAME_H
@@ -141,27 +174,177 @@
       const topOffset = Math.max((vh - FRAME_H * scale) / 2, SAFE_MARGIN_PX/2);
       frame.style.transform = `translateY(${topOffset}px) scale(${scale})`;
     }
+    let rafId = null;
+    function fitFrame(){ if(rafId) cancelAnimationFrame(rafId); rafId = requestAnimationFrame(()=>{ rafId=null; fitFrameNow(); }); }
+    window.addEventListener('resize', fitFrame, { passive:true });
+    document.addEventListener('fullscreenchange', fitFrame);
+    fitFrame();
 
+    /* ============ Klok (zonder elke seconde reflowen) ============ */
+    function renderHeader(){
+      const n = new Date();
+      document.getElementById('zd-clock').textContent =
+        n.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      document.getElementById('zd-date').textContent =
+        n.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'});
+    }
+    renderHeader();
+    setInterval(renderHeader, 1000);
+
+    /* ============ Cache helpers ============ */
+    const cacheKey = (k)=>`zrd_${k}`;
+    function readCache(k){
+      try{
+        const raw = localStorage.getItem(cacheKey(k));
+        if(!raw) return null;
+        const obj = JSON.parse(raw);
+        if(!obj || !obj.data || !obj.ts) return null;
+        if(Date.now() - obj.ts > CONFIG.cacheTtlMs) return obj; // verouderd maar bruikbaar als fallback
+        return obj;
+      }catch{ return null; }
+    }
+    function writeCache(k, data){
+      try{ localStorage.setItem(cacheKey(k), JSON.stringify({ ts: Date.now(), data })); }catch{}
+    }
+
+    /* ============ UI helpers ============ */
+    const $ = (s)=>document.querySelector(s);
+    const chip = (type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
+    const weekNumber=(d)=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fT=new Date(Date.UTC(t.getUTCFullYear(),0,4));return 1+Math.round(((t-fT)/86400000-3+((fT.getUTCDay()+6)%7))/7);};
+    const isEvenWeek=(d)=>weekNumber(d)%2===0;
+    const getOpsDate=(x=new Date())=>{const d=new Date(x); if(d.getHours()<4) d.setDate(d.getDate()-1); return d; };
+
+    /* ============ Renderers ============ */
+    function renderChecklists(items){
+      const list=$("#zd-checklistList"); list.innerHTML="";
+      if(!items || !items.length){ list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`; return; }
+      items.forEach(c=>{
+        const el=document.createElement('div'); el.className='zd-item';
+        el.innerHTML = `<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;
+        list.appendChild(el);
+      });
+    }
+
+    function renderPeriodic(items){
+      const list=$("#zd-periodicList"); list.innerHTML="";
+      const t = items || [];
+      if(!t.length){ list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div><div>${chip("open","—")}</div></div>`; return; }
+      t.forEach(x=>{
+        const el=document.createElement('div'); el.className='zd-item';
+        el.innerHTML=`<div class="zd-name">${x.title}</div><div>${chip("ok","Inplannen/Check")}</div>`;
+        list.appendChild(el);
+      });
+    }
+
+    function renderOrders(){
+      const wrap=$("#zd-ordersList"); wrap.innerHTML="";
+      const n=new Date(), ops=getOpsDate(n), dow=ops.getDay(), even=isEvenWeek(ops);
+      const rules=[
+        {vendor:"Bidfood",weekdays:[2],deadline:"00:00"},
+        {vendor:"Bubbels",weekdays:[3],deadline:"23:00",evenWeeks:true},
+        {vendor:"Zusje Kantoor",weekdays:[3],deadline:"23:00",evenWeeks:true},
+        {vendor:"Bidfood",weekdays:[4],deadline:"00:00"},
+        {vendor:"Bidfood",weekdays:[6],deadline:"00:00"},
+      ];
+      const td=rules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));
+      if(!td.length){ wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div><div>${chip("open","—")}</div></div>`; return; }
+      td.forEach(r=>{
+        let limit=new Date(ops);
+        if(r.deadline==="00:00"){ limit.setDate(limit.getDate()+1); limit.setHours(0,0,0,0);}
+        else{ const [h,m]=(r.deadline||"23:59").split(":").map(Number); limit.setHours(h,m||0,0,0); }
+        const diff=Math.round((limit-n)/60000);
+        let type="open", lab=`vóór ${r.deadline}`;
+        if(diff<0){ type="bad"; lab="Te laat"; }
+        else if(diff<=60){ type="warn"; lab=`Binnen ${diff}m`; }
+        const el=document.createElement('div'); el.className='zd-item';
+        el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div><div>${chip(type,type==="open"?"Doen":lab)}</div>`;
+        wrap.appendChild(el);
+      });
+    }
+
+    function renderContainers(data){
+      // Verwacht formaat van je containers endpoint: { ok:true, containers:[...], emballage:[...] } — pas aan naar je werkelijke schema
+      const lc=$("#zd-wasteContainers"), le=$("#zd-wasteEmballage");
+      lc.innerHTML=""; le.innerHTML="";
+      const cont = (data && data.containers) || [];
+      const emb  = (data && data.emballage)  || [];
+      if(!cont.length) lc.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
+      if(!emb.length)  le.innerHTML=`<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
+      cont.forEach(n=>{ const el=document.createElement('div'); el.className='zd-item'; el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`; lc.appendChild(el); });
+      emb.forEach(n=>{ const el=document.createElement('div'); el.className='zd-item'; el.innerHTML=`<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`; le.appendChild(el); });
+    }
+
+    /* ============ Data: cache-first, network-later ============ */
+    async function fetchWithTimeout(url, opts={}, ms=CONFIG.fetchTimeoutMs){
+      return new Promise((resolve, reject)=>{
+        const t = setTimeout(()=>reject(new Error("timeout")), ms);
+        fetch(url, opts).then(res=>{ clearTimeout(t); resolve(res); }).catch(err=>{ clearTimeout(t); reject(err); });
+      });
+    }
+
+    function renderFromCache(){
+      const c1 = readCache('checklists');
+      if(c1 && c1.data && Array.isArray(c1.data.items)){
+        const items = c1.data.items.map(it=>({ name:String(it.name||"").trim(), done:!!it.done })).filter(x=>x.name);
+        renderChecklists(items);
+      }
+      const c2 = readCache('periodic');
+      if(c2 && c2.data && Array.isArray(c2.data.items)){
+        const items = c2.data.items.map(ev=>({ title:ev.title, allDay:!!ev.allDay }));
+        renderPeriodic(items);
+      }
+      const c3 = readCache('containers');
+      if(c3 && c3.data){ renderContainers(c3.data); }
+      renderOrders();
+    }
+
+    async function refreshAll(){
+      // Parallel ophalen; valt terug op cache bij timeout
+      const q1 = (async()=>{
+        try{
+          const r = await fetchWithTimeout(CONFIG.sheets.checklistsJson, { cache:'no-store' });
+          if(r.ok){ const j = await r.json(); writeCache('checklists', j);
+            const items = (j.items||[]).map(it=>({ name:String(it.name||"").trim(), done:!!it.done })).filter(x=>x.name);
+            renderChecklists(items);
+          }
+        }catch{}
+      })();
+
+      const q2 = (async()=>{
+        try{
+          const u=CONFIG.sheets.periodicJson;
+          const r = await fetchWithTimeout(u+(u.includes('?')?'&':'?')+'tz=Europe/Amsterdam', { cache:'no-store' });
+          if(r.ok){ const j = await r.json(); writeCache('periodic', j);
+            const items = (j.items||[]).map(ev=>({ title:ev.title, allDay:!!ev.allDay }));
+            renderPeriodic(items);
+          }
+        }catch{}
+      })();
+
+      const q3 = (async()=>{
+        try{
+          const r = await fetchWithTimeout(CONFIG.sheets.containersJson, { cache:'no-store' });
+          if(r.ok){ const j = await r.json(); writeCache('containers', j); renderContainers(j); }
+        }catch{}
+      })();
+
+      await Promise.allSettled([q1,q2,q3]);
+    }
+
+    // Init: toon direct cache/skeleton → dan verversen
+    renderFromCache();
+    refreshAll();
+
+    // Interval vernieuwing
+    setInterval(refreshAll, CONFIG.refreshMs);
+
+    // Fullscreen via F (optioneel, zoals eerder)
     document.addEventListener('keydown', e=>{
       if((e.key||'').toLowerCase()==='f'){
         if(document.fullscreenElement) document.exitFullscreen();
         else document.documentElement.requestFullscreen();
       }
     });
-
-    window.addEventListener('resize', fitFrame);
-    document.addEventListener('fullscreenchange', fitFrame);
-    fitFrame();
-
-    /* Dummy klok zodat je kan testen */
-    setInterval(()=>{
-      const n=new Date();
-      document.getElementById('zd-clock').textContent =
-        n.toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      document.getElementById('zd-date').textContent =
-        n.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'});
-      fitFrame();
-    },1000);
   })();
   </script>
 </body>
