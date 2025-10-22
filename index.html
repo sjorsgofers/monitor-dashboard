@@ -2,14 +2,14 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=1920, initial-scale=1" />
   <title>Zusje Roermond Dashboard</title>
   <style>
-    html, body { height:100%; margin:0; }
-    /* Scroll toestaan als het scherm kleiner is */
-    body { background:#000; overflow:auto; }
+    html, body { height:100%; margin:0; background:#000; overflow:hidden;
+      -webkit-text-size-adjust:100%; text-size-adjust:100%;
+    }
 
-    /* Shell vult venster */
+    /* Shell vult venster, geen scroll */
     #dashboard-shell{
       position:fixed; inset:0;
       background:#f3f6fb;
@@ -17,12 +17,12 @@
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
-    /* Vast canvas 1600x900 dat we schalen */
+    /* Vast canvas dat we schalen — NU 1920×1080 (1080p) */
     .zd-stage{ position:relative; width:100%; height:100%; }
     .zd-frame{
       position:absolute;
       left:50%; top:50%;
-      width:1600px; height:900px;
+      width:1920px; height:1080px;             /* ← aangepast naar 1080p */
       transform: translate(-50%, -50%) scale(1);
       transform-origin: center center;
       will-change: transform;
@@ -31,18 +31,18 @@
     /* UI (prefixed met zd-) */
     .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
-    .zd-title{ font-weight:900; font-size:44px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .zd-meta{ color:#60708d; font-size:18px; margin-top:8px; }
-    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:42px; color:#0f172a; text-align:right; }
-    .zd-date{ color:#60708d; font-size:18px; text-align:right; }
+    .zd-title{ font-weight:900; font-size:48px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .zd-meta{ color:#60708d; font-size:20px; margin-top:8px; }
+    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:48px; color:#0f172a; text-align:right; }
+    .zd-date{ color:#60708d; font-size:20px; text-align:right; }
 
-    /* 3-koloms grid: elk 4 kolommen breed (12 totaal) */
+    /* 3 kolommen vast — nooit stapelen */
     .zd-grid{
       display:grid; gap:24px;
-      grid-template-columns: repeat(12, 1fr);
+      grid-template-columns: repeat(12, 1fr);    /* 12 kolommen */
       height: calc(100% - 110px);
     }
-    .zd-col-4{ grid-column:span 4; }
+    .zd-col-4{ grid-column:span 4; }             /* 3 kolommen van elk 4 */
 
     .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); }
     .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
@@ -52,7 +52,7 @@
     .zd-band-orders{ background:linear-gradient(90deg,#f59e0b,#ffe29a); }
     .zd-band-waste{  background:linear-gradient(90deg,#16a34a,#a7f3d0); }
 
-    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:22px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
+    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:24px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
     .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
     .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
 
@@ -67,12 +67,7 @@
     .zd-bad{  color:#7f1d1d; border-color:rgba(239,68,68,.4);   background:linear-gradient(180deg,#fee2e2,#fecaca); }
     .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
 
-    /* Kleine responsive tweaks voor heel smalle schermen */
-    @media (max-width: 1200px){
-      .zd-title{ font-size:36px; }
-      .zd-grid{ grid-template-columns: repeat(6, 1fr); }
-      .zd-col-4{ grid-column:span 6; } /* stapel kolommen onder elkaar op smal scherm */
-    }
+    /* Belangrijk: GEEN @media meer — dus nooit stapelen */
   </style>
 </head>
 <body>
@@ -91,7 +86,7 @@
             </div>
           </div>
 
-          <!-- 3 kolommen -->
+          <!-- 3 kolommen (vaste layout) -->
           <div class="zd-grid">
             <!-- Kolom 1: Checklisten -->
             <div class="zd-col-4">
@@ -104,7 +99,7 @@
               </div>
             </div>
 
-            <!-- Kolom 2: Containers + Emballage (onder elkaar) -->
+            <!-- Kolom 2: Containers + Emballage -->
             <div class="zd-col-4">
               <div class="zd-panel" style="margin-bottom:24px;">
                 <section class="zd-card">
@@ -115,7 +110,6 @@
                   </div>
                 </section>
               </div>
-
               <div class="zd-panel">
                 <section class="zd-card">
                   <div class="zd-band zd-band-waste"></div>
@@ -127,7 +121,7 @@
               </div>
             </div>
 
-            <!-- Kolom 3: Periodiek + Bestellen (onder elkaar) -->
+            <!-- Kolom 3: Periodiek + Bestellen -->
             <div class="zd-col-4">
               <div class="zd-panel" style="margin-bottom:24px;">
                 <section class="zd-card">
@@ -136,7 +130,6 @@
                   <div class="zd-card-b"><div class="zd-list" id="zd-periodicList"></div></div>
                 </section>
               </div>
-
               <div class="zd-panel">
                 <section class="zd-card">
                   <div class="zd-band zd-band-orders"></div>
@@ -156,11 +149,8 @@
     /* ====== Endpoints ====== */
     const CONFIG = {
       sheets:{
-        // Checklisten (Apps Script uit je sheet)
         checklistsJson:"https://script.google.com/macros/s/AKfycbw_Tn0z0s3AJ7CARzHt9sFy8CGhrCe_HzS9ao0KKDtgzq9TR_H-28WBss316I6PDcr7/exec",
-        // Periodieke taken (APARTE agenda + web app)
         periodicJson:"https://script.google.com/macros/s/AKfycbxEDSHzBOrrYqkNOCQI6clM6DNuoge55tdATn1XNC63HT7GgPcsZF5AT3dwfaLjEUmV/exec",
-        // Containers (NIEUWE agenda + web app, alléén voor containers)
         containersJson:"https://script.google.com/macros/s/AKfycbwPQ1WsRqrJmRuYD8bL6kz5H5sSDNcBsIa0z-WW4hain7fkVhM6HIUQI3DHyhpn-C1zHQ/exec"
       },
       refreshMs:15000
@@ -168,20 +158,20 @@
 
     /* ===== Emballage vast schema (0=zo..6=za) — NIET uit agenda ===== */
     const EMBALLAGE_SCHEDULE = {
-      1: ["Bidfood emballage klaarzetten", "Gele Zusje kratten klaarzetten"], // maandag
-      3: ["Bidfood emballage klaarzetten"],                                   // woensdag
-      5: ["Bidfood emballage klaarzetten"]                                    // vrijdag
+      1: ["Bidfood emballage klaarzetten", "Gele Zusje kratten klaarzetten"],
+      3: ["Bidfood emballage klaarzetten"],
+      5: ["Bidfood emballage klaarzetten"]
     };
 
     /* ===== Containers fallback als agenda niets geeft ===== */
     const FALLBACK_CONTAINERS = {
-      0: ["Restafval containers klaarzetten"], // zondag
-      1: ["Glas containers klaarzetten"],      // maandag
-      2: ["Restafval containers klaarzetten"], // dinsdag
-      3: [],                                   // woensdag
-      4: ["Papier container klaarzetten"],     // donderdag
-      5: [],                                   // vrijdag
-      6: []                                    // zaterdag
+      0: ["Restafval containers klaarzetten"],
+      1: ["Glas containers klaarzetten"],
+      2: ["Restafval containers klaarzetten"],
+      3: [],
+      4: ["Papier container klaarzetten"],
+      5: [],
+      6: []
     };
     const THURSDAY_PLASTIC_LABEL = "Plastic containers klaarzetten";
 
@@ -197,7 +187,7 @@
         {vendor:"Bidfood",weekdays:[6],deadline:"00:00"}
       ]
     };
-    let containersData = null; // cache van agenda-endpoint
+    let containersData = null;
 
     /* ====== Helpers ====== */
     const $=sel=>document.querySelector(sel);
@@ -375,8 +365,8 @@
       fitFrame();
     }
 
-    /* ====== Perfect passend schalen (met kleine marge + extra krimp) ====== */
-    const FRAME_W = 1600, FRAME_H = 900, SAFE_MARGIN_PX = 18;
+    /* ====== Schalen voor 1080p, nooit stapelen ====== */
+    const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 18;
 
     function fitFrame(){
       const shell = document.getElementById('dashboard-shell');
@@ -385,18 +375,19 @@
       const viewW = Math.max(1, window.innerWidth  || shell.clientWidth  || document.documentElement.clientWidth);
       const viewH = Math.max(1, window.innerHeight || shell.clientHeight || document.documentElement.clientHeight);
 
-      const baseScale = Math.min(
+      // Maximale schaal die past binnen scherm + kleine krimp i.v.m. overscan
+      const base = Math.min(
         (viewW - SAFE_MARGIN_PX) / FRAME_W,
         (viewH - SAFE_MARGIN_PX) / FRAME_H
       );
 
-      const EXTRA_SHRINK = 0.94; // pas eventueel bij: 0.92–0.98
-      const scale = baseScale * EXTRA_SHRINK;
+      const EXTRA_SHRINK = 0.96; // pas aan indien nodig (0.90–1.00)
+      const scale = base * EXTRA_SHRINK;
 
       frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
 
-    /* ====== Fullscreen via sneltoets 'F' ====== */
+    /* ====== Fullscreen met 'F' ====== */
     async function toggleFS(){
       try{
         if(document.fullscreenElement){
@@ -410,14 +401,14 @@
     }
     document.addEventListener('keydown', (e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
 
-    /* ====== Refit hooks ====== */
+    /* ====== Hooks ====== */
     window.addEventListener('resize', fitFrame);
     window.addEventListener('orientationchange', fitFrame);
     document.addEventListener('fullscreenchange', fitFrame);
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) fitFrame(); });
     if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
 
-    /* ====== Init loops ====== */
+    /* ====== Init ====== */
     fitFrame(); renderHeader(); loadAll();
     setInterval(()=>{ renderHeader(); fitFrame(); },1000);
     setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
