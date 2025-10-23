@@ -17,12 +17,12 @@
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
-    /* Vast canvas dat we schalen — NU 1920×1080 (1080p) */
+    /* Vast canvas dat we schalen — 1920×1080 (1080p) */
     .zd-stage{ position:relative; width:100%; height:100%; }
     .zd-frame{
       position:absolute;
       left:50%; top:50%;
-      width:1920px; height:1080px;             /* ← aangepast naar 1080p */
+      width:1920px; height:1080px;
       transform: translate(-50%, -50%) scale(1);
       transform-origin: center center;
       will-change: transform;
@@ -39,10 +39,10 @@
     /* 3 kolommen vast — nooit stapelen */
     .zd-grid{
       display:grid; gap:24px;
-      grid-template-columns: repeat(12, 1fr);    /* 12 kolommen */
+      grid-template-columns: repeat(12, 1fr);
       height: calc(100% - 110px);
     }
-    .zd-col-4{ grid-column:span 4; }             /* 3 kolommen van elk 4 */
+    .zd-col-4{ grid-column:span 4; }
 
     .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); }
     .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
@@ -66,8 +66,6 @@
     .zd-warn{ color:#7c2d12; border-color:rgba(245,158,11,.4);  background:linear-gradient(180deg,#fef3c7,#fde68a); }
     .zd-bad{  color:#7f1d1d; border-color:rgba(239,68,68,.4);   background:linear-gradient(180deg,#fee2e2,#fecaca); }
     .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
-
-    /* Belangrijk: GEEN @media meer — dus nooit stapelen */
   </style>
 </head>
 <body>
@@ -263,27 +261,29 @@
       });
     }
 
+    /* Geen chips in periodieke lijst */
     function renderPeriodic(){
       const list=$("#zd-periodicList"); list.innerHTML="";
       const t=state.periodicTasks||[];
       if(!t.length){
-        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div><div>${chip("open","—")}</div></div>`;
+        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div></div>`;
         return;
       }
       t.forEach(x=>{
         const el=document.createElement("div"); el.className="zd-item";
         const when = x.allDay ? "<em>— hele dag</em>" : "";
-        el.innerHTML=`<div class="zd-name">${x.title} ${when}</div><div>${chip("ok","Inplannen/Check")}</div>`;
+        el.innerHTML=`<div class="zd-name">${x.title} ${when}</div>`;
         list.appendChild(el);
       });
     }
 
+    /* Geen chips in bestellen-lijst */
     function renderOrders(){
       const wrap=$("#zd-ordersList"); wrap.innerHTML="";
       const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);
       const td=state.ordersRules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));
       if(!td.length){
-        wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div><div>${chip("open","—")}</div></div>`;
+        wrap.innerHTML=`<div class="zd-item"><div class="zd-name">Geen bestellingen</div></div>`;
         return;
       }
       td.forEach(r=>{
@@ -291,15 +291,16 @@
         if(r.deadline==="00:00"){limit.setDate(limit.getDate()+1);limit.setHours(0,0,0,0);}
         else{const [h,m]=(r.deadline||"23:59").split(":").map(Number);limit.setHours(h,m||0,0,0);}
         const diff=Math.round((limit-n)/60000);
-        let type="open",lab=`vóór ${r.deadline}`;
-        if(diff<0){type="bad";lab="Te laat";}
-        else if(diff<=60){type="warn";lab=`Binnen ${diff}m`;}
+        let lab=`vóór ${r.deadline}`;
+        if(diff<0){lab="Te laat";}
+        else if(diff<=60){lab=`Binnen ${diff}m`;}
         const el=document.createElement("div"); el.className="zd-item";
-        el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div><div>${chip(type,type==="open"?"Doen":lab)}</div>`;
+        el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div>`;
         wrap.appendChild(el);
       });
     }
 
+    /* Geen chips in containers & emballage */
     function renderContainers(){
       const lc = $("#zd-wasteContainers");
       const le = $("#zd-wasteEmballage");
@@ -334,23 +335,22 @@
         }
       }
 
-      /* Render */
       if (containers.length === 0){
-        lc.innerHTML = `<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
+        lc.innerHTML = `<div class="zd-item"><div class="zd-name">—</div></div>`;
       } else {
         containers.forEach(n=>{
           const el=document.createElement("div"); el.className="zd-item";
-          el.innerHTML = `<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;
+          el.innerHTML = `<div class="zd-name">${n}</div>`;
           lc.appendChild(el);
         });
       }
 
       if (emballage.length === 0){
-        le.innerHTML = `<div class="zd-item"><div class="zd-name">—</div><div>${chip("open","Geen")}</div></div>`;
+        le.innerHTML = `<div class="zd-item"><div class="zd-name">—</div></div>`;
       } else {
         emballage.forEach(n=>{
           const el=document.createElement("div"); el.className="zd-item";
-          el.innerHTML = `<div class="zd-name">${n}</div><div>${chip("ok","Klaarzetten")}</div>`;
+          el.innerHTML = `<div class="zd-name">${n}</div>`;
           le.appendChild(el);
         });
       }
@@ -365,7 +365,7 @@
       fitFrame();
     }
 
-    /* ====== Schalen voor 1080p, nooit stapelen ====== */
+    /* ====== Schalen voor 1080p ====== */
     const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 18;
 
     function fitFrame(){
@@ -375,13 +375,12 @@
       const viewW = Math.max(1, window.innerWidth  || shell.clientWidth  || document.documentElement.clientWidth);
       const viewH = Math.max(1, window.innerHeight || shell.clientHeight || document.documentElement.clientHeight);
 
-      // Maximale schaal die past binnen scherm + kleine krimp i.v.m. overscan
       const base = Math.min(
         (viewW - SAFE_MARGIN_PX) / FRAME_W,
         (viewH - SAFE_MARGIN_PX) / FRAME_H
       );
 
-      const EXTRA_SHRINK = 0.96; // pas aan indien nodig (0.90–1.00)
+      const EXTRA_SHRINK = 0.96; // 0.90–1.00
       const scale = base * EXTRA_SHRINK;
 
       frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
