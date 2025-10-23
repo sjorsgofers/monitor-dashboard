@@ -209,6 +209,7 @@
       }catch(e){ console.warn("Checklist fetch fail",e); }
     }
 
+    /* Periodieke taken: bewaar ook start/eind zodat we tijden kunnen tonen */
     async function fetchPeriodic(){
       const u=CONFIG.sheets.periodicJson;
       if(!u) return;
@@ -217,7 +218,14 @@
         const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});
         if(r.ok){
           const j=await r.json();
-          state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))?j.items.map(ev=>({title:ev.title,allDay:!!ev.allDay})):[]; 
+          state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))
+            ? j.items.map(ev=>({
+                title: ev.title,
+                start: ev.start || null,
+                end:   ev.end   || null,
+                allDay: !!ev.allDay
+              }))
+            : [];
         }
       }catch(e){ console.warn("Periodic fail",e); }
     }
@@ -261,7 +269,7 @@
       });
     }
 
-    /* Geen chips in periodieke lijst */
+    /* Periodiek: toon alleen tijden als het NIET all-day is */
     function renderPeriodic(){
       const list=$("#zd-periodicList"); list.innerHTML="";
       const t=state.periodicTasks||[];
@@ -269,15 +277,23 @@
         list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div></div>`;
         return;
       }
+
+      const tf = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute:'2-digit' });
+
       t.forEach(x=>{
+        let timePart = "";
+        if(!x.allDay && x.start){
+          const s = new Date(x.start);
+          const e = x.end ? new Date(x.end) : null;
+          timePart = ` <em>${tf.format(s)}${e ? "–"+tf.format(e) : ""}</em>`;
+        }
         const el=document.createElement("div"); el.className="zd-item";
-        const when = x.allDay ? "<em>— hele dag</em>" : "";
-        el.innerHTML=`<div class="zd-name">${x.title} ${when}</div>`;
+        el.innerHTML=`<div class="zd-name">${x.title}${timePart}</div>`;
         list.appendChild(el);
       });
     }
 
-    /* Geen chips in bestellen-lijst */
+    /* Bestellen-lijst (ongewijzigd qua tijden) */
     function renderOrders(){
       const wrap=$("#zd-ordersList"); wrap.innerHTML="";
       const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);
@@ -300,7 +316,7 @@
       });
     }
 
-    /* Geen chips in containers & emballage */
+    /* Containers & Emballage (zoals eerder, geen chips) */
     function renderContainers(){
       const lc = $("#zd-wasteContainers");
       const le = $("#zd-wasteEmballage");
