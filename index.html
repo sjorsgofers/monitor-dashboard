@@ -28,15 +28,15 @@
       will-change: transform;
     }
 
-    /* UI (prefixed met zd-) */
+    /* UI */
     .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
-    .zd-title{ font-weight:900; font-size:64px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .zd-meta{ color:#60708d; font-size:26px; margin-top:8px; }
-    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:96px; color:#0f172a; text-align:right; }
-    .zd-date{ color:#60708d; font-size:26px; text-align:right; }
+    .zd-title{ font-weight:900; font-size:72px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .zd-meta{ color:#60708d; font-size:30px; margin-top:8px; }
+    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:120px; color:#0f172a; text-align:right; line-height:1; }
+    .zd-date{ color:#60708d; font-size:30px; text-align:right; }
 
-    /* 3 kolommen vast — nooit stapelen */
+    /* 3 kolommen vast */
     .zd-grid{
       display:grid; gap:24px;
       grid-template-columns: repeat(12, 1fr);
@@ -52,19 +52,18 @@
     .zd-band-orders{ background:linear-gradient(90deg,#f59e0b,#ffe29a); }
     .zd-band-waste{  background:linear-gradient(90deg,#16a34a,#a7f3d0); }
 
-    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:30px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
-    .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
-    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
+    .zd-card-h{ padding:20px 22px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:34px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
+    .zd-tag{ margin-left:auto; font-size:13px; font-weight:800; color:#0b1220; padding:7px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
+    .zd-card-b{ padding:22px; gap:16px; display:flex; flex-direction:column; flex:1; overflow:auto; }
 
-    .zd-list{ display:flex; flex-direction:column; gap:12px; }
-    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
-    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:26px; color:#0b1220; }
+    .zd-list{ display:flex; flex-direction:column; gap:14px; }
+    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:18px 20px; border-radius:16px; border:1px solid #e5e7eb; }
+    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:30px; color:#0b1220; }
     .zd-name em{ font-style:normal; color:#64748b; font-weight:700; }
 
-    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:20px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
+    /* Alleen nodig in Checklisten (andere panelen tonen geen knoppen) */
+    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:22px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
     .zd-ok{   color:#065f46; border-color:rgba(16,185,129,.35); background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
-    .zd-warn{ color:#7c2d12; border-color:rgba(245,158,11,.4);  background:linear-gradient(180deg,#fef3c7,#fde68a); }
-    .zd-bad{  color:#7f1d1d; border-color:rgba(239,68,68,.4);   background:linear-gradient(180deg,#fee2e2,#fecaca); }
     .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
   </style>
 </head>
@@ -84,7 +83,7 @@
             </div>
           </div>
 
-          <!-- 3 kolommen (vaste layout) -->
+          <!-- 3 kolommen -->
           <div class="zd-grid">
             <!-- Kolom 1: Checklisten -->
             <div class="zd-col-4">
@@ -103,18 +102,14 @@
                 <section class="zd-card">
                   <div class="zd-band zd-band-waste"></div>
                   <div class="zd-card-h">Containers (vandaag) <span class="zd-tag">Buiten</span></div>
-                  <div class="zd-card-b">
-                    <div class="zd-list" id="zd-wasteContainers"></div>
-                  </div>
+                  <div class="zd-card-b"><div class="zd-list" id="zd-wasteContainers"></div></div>
                 </section>
               </div>
               <div class="zd-panel">
                 <section class="zd-card">
                   <div class="zd-band zd-band-waste"></div>
                   <div class="zd-card-h">Emballage (vandaag) <span class="zd-tag">Vast schema</span></div>
-                  <div class="zd-card-b">
-                    <div class="zd-list" id="zd-wasteEmballage"></div>
-                  </div>
+                  <div class="zd-card-b"><div class="zd-list" id="zd-wasteEmballage"></div></div>
                 </section>
               </div>
             </div>
@@ -289,7 +284,7 @@
       });
     }
 
-    /* Bestellen-lijst (zonder extra chips) */
+    /* Bestellen-lijst (zonder extra knoppen) */
     function renderOrders(){
       const wrap=$("#zd-ordersList"); wrap.innerHTML="";
       const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);
@@ -312,7 +307,7 @@
       });
     }
 
-    /* Containers & Emballage (zonder extra chips) */
+    /* Containers & Emballage (zonder extra knoppen) */
     function renderContainers(){
       const lc = $("#zd-wasteContainers");
       const le = $("#zd-wasteEmballage");
@@ -392,7 +387,7 @@
         (viewH - SAFE_MARGIN_PX) / FRAME_H
       );
 
-      const EXTRA_SHRINK = 0.96; // 0.90–1.00
+      const EXTRA_SHRINK = 0.96;
       const scale = base * EXTRA_SHRINK;
 
       frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
