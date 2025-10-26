@@ -31,10 +31,10 @@
     /* UI (prefixed met zd-) */
     .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
-    .zd-title{ font-weight:900; font-size:48px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .zd-meta{ color:#60708d; font-size:20px; margin-top:8px; }
-    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:48px; color:#0f172a; text-align:right; }
-    .zd-date{ color:#60708d; font-size:20px; text-align:right; }
+    .zd-title{ font-weight:900; font-size:52px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .zd-meta{ color:#60708d; font-size:22px; margin-top:8px; }
+    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:60px; color:#0f172a; text-align:right; }
+    .zd-date{ color:#60708d; font-size:22px; text-align:right; }
 
     /* 3 kolommen vast — nooit stapelen */
     .zd-grid{
@@ -52,13 +52,13 @@
     .zd-band-orders{ background:linear-gradient(90deg,#f59e0b,#ffe29a); }
     .zd-band-waste{  background:linear-gradient(90deg,#16a34a,#a7f3d0); }
 
-    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:24px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
+    .zd-card-h{ padding:18px 20px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:26px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
     .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
     .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
 
     .zd-list{ display:flex; flex-direction:column; gap:12px; }
     .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
-    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:20px; color:#0b1220; }
+    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:22px; color:#0b1220; }
     .zd-name em{ font-style:normal; color:#64748b; font-weight:700; }
 
     .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:16px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
@@ -194,7 +194,6 @@
     const fmtDutchDate=d=>d.toLocaleDateString("nl-NL",{weekday:"long",day:"2-digit",month:"long"});
     const weekNumber=d=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fT=new Date(Date.UTC(t.getUTCFullYear(),0,4));return 1+Math.round(((t-fT)/86400000-3+((fT.getUTCDay()+6)%7))/7);};
     const isEvenWeek=d=>weekNumber(d)%2===0;
-    const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
 
     /* ====== Data ====== */
     async function fetchChecklists(){
@@ -209,7 +208,7 @@
       }catch(e){ console.warn("Checklist fetch fail",e); }
     }
 
-    /* Periodieke taken: bewaar ook start/eind zodat we tijden kunnen tonen */
+    /* Periodieke taken: bewaar ook start/eind zodat we tijden kunnen tonen (alleen bij niet-hele-dag) */
     async function fetchPeriodic(){
       const u=CONFIG.sheets.periodicJson;
       if(!u) return;
@@ -259,12 +258,12 @@
     function renderChecklists(){
       const list=$("#zd-checklistList"); list.innerHTML="";
       if(!state.checklists.length){
-        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`;
+        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div class="zd-chip zd-open">—</div></div>`;
         return;
       }
       state.checklists.forEach(c=>{
         const el=document.createElement("div"); el.className="zd-item";
-        el.innerHTML=`<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;
+        el.innerHTML=`<div class="zd-name">${c.name}</div><div class="zd-chip ${c.done?'zd-ok':'zd-open'}">${c.done?'✔ Gereed':'Nog doen'}</div>`;
         list.appendChild(el);
       });
     }
@@ -293,7 +292,7 @@
       });
     }
 
-    /* Bestellen-lijst (ongewijzigd qua tijden) */
+    /* Bestellen-lijst (zonder extra chips) */
     function renderOrders(){
       const wrap=$("#zd-ordersList"); wrap.innerHTML="";
       const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);
@@ -316,7 +315,7 @@
       });
     }
 
-    /* Containers & Emballage (zoals eerder, geen chips) */
+    /* Containers & Emballage (zonder extra chips) */
     function renderContainers(){
       const lc = $("#zd-wasteContainers");
       const le = $("#zd-wasteEmballage");
@@ -346,8 +345,8 @@
       }
       if (containers.length === 0) {
         containers = FALLBACK_CONTAINERS[dow] ? [...FALLBACK_CONTAINERS[dow]] : [];
-        if (dow === 4 && isEvenWeek(ops)) {
-          if(!containers.includes(THURSDAY_PLASTIC_LABEL)) containers.push(THURSDAY_PLASTIC_LABEL);
+        if (dow === 4 && (weekNumber(ops)%2===0)) {
+          if(!containers.includes("Plastic containers klaarzetten")) containers.push("Plastic containers klaarzetten");
         }
       }
 
