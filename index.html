@@ -5,12 +5,18 @@
   <meta name="viewport" content="width=1920, initial-scale=1" />
   <title>Zusje Roermond Dashboard</title>
   <style>
-    html, body { height:100%; margin:0; background:#000; overflow:hidden;
-      -webkit-text-size-adjust:100%; text-size-adjust:100%;
+    html, body {
+      height:100%;
+      margin:0;
+      background:#000;
+      overflow:hidden;
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
     }
 
     #dashboard-shell{
-      position:fixed; inset:0;
+      position:fixed;
+      inset:0;
       background:#f3f6fb;
       overflow:hidden;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
@@ -28,13 +34,22 @@
 
     .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
-    .zd-title{ font-weight:900; font-size:72px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .zd-meta{ color:#60708d; font-size:30px; margin-top:8px; }
-    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:120px; color:#0f172a; text-align:right; line-height:1; }
-    .zd-date{ color:#60708d; font-size:30px; text-align:right; }
+    .zd-title{
+      font-weight:900;
+      font-size:52px;
+      letter-spacing:.2px;
+      background:linear-gradient(90deg,#2563eb,#06b6d4);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .zd-meta{ color:#60708d; font-size:20px; margin-top:8px; }
+    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:90px; color:#0f172a; text-align:right; line-height:.95; }
+    .zd-date{ color:#60708d; font-size:22px; text-align:right; }
 
     .zd-grid{
-      display:grid; gap:24px;
+      display:grid;
+      gap:24px;
       grid-template-columns: repeat(12, 1fr);
       height: calc(100% - 110px);
     }
@@ -48,18 +63,30 @@
     .zd-band-orders{ background:linear-gradient(90deg,#f59e0b,#ffe29a); }
     .zd-band-waste{  background:linear-gradient(90deg,#16a34a,#a7f3d0); }
 
-    .zd-card-h{ padding:20px 22px; border-bottom:1px solid #eef2f7; font-weight:900; font-size:34px; color:#0f172a; background:linear-gradient(#ffffff,#fbfdff); display:flex; align-items:center; gap:10px; }
-    .zd-tag{ margin-left:auto; font-size:13px; font-weight:800; color:#0b1220; padding:7px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
-    .zd-card-b{ padding:22px; gap:16px; display:flex; flex-direction:column; flex:1; overflow:auto; }
+    .zd-card-h{
+      padding:18px 20px;
+      border-bottom:1px solid #eef2f7;
+      font-weight:900;
+      font-size:24px;
+      color:#0f172a;
+      background:linear-gradient(#ffffff,#fbfdff);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
+    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
 
-    .zd-list{ display:flex; flex-direction:column; gap:14px; }
-    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:18px 20px; border-radius:16px; border:1px solid #e5e7eb; }
-    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:30px; color:#0b1220; }
+    .zd-list{ display:flex; flex-direction:column; gap:12px; }
+    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
+    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:20px; color:#0b1220; }
     .zd-name em{ font-style:normal; color:#64748b; font-weight:700; }
 
-    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:22px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
+    /* Chips blijven alleen voor checklist-panel */
+    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:16px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
     .zd-ok{   color:#065f46; border-color:rgba(16,185,129,.35); background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
     .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
+
   </style>
 </head>
 <body>
@@ -96,14 +123,18 @@
                 <section class="zd-card">
                   <div class="zd-band zd-band-waste"></div>
                   <div class="zd-card-h">Containers (vandaag) <span class="zd-tag">Buiten</span></div>
-                  <div class="zd-card-b"><div class="zd-list" id="zd-wasteContainers"></div></div>
+                  <div class="zd-card-b">
+                    <div class="zd-list" id="zd-wasteContainers"></div>
+                  </div>
                 </section>
               </div>
               <div class="zd-panel">
                 <section class="zd-card">
                   <div class="zd-band zd-band-waste"></div>
                   <div class="zd-card-h">Emballage (vandaag) <span class="zd-tag">Vast schema</span></div>
-                  <div class="zd-card-b"><div class="zd-list" id="zd-wasteEmballage"></div></div>
+                  <div class="zd-card-b">
+                    <div class="zd-list" id="zd-wasteEmballage"></div>
+                  </div>
                 </section>
               </div>
             </div>
@@ -133,23 +164,29 @@
 
   <script>
   (function(){
+    /* ====== Endpoints ====== */
     const CONFIG = {
       sheets:{
+        // checklists (je werkende script)
         checklistsJson:"https://script.google.com/macros/s/AKfycbw_Tn0z0s3AJ7CARzHt9sFy8CGhrCe_HzS9ao0KKDtgzq9TR_H-28WBss316I6PDcr7/exec",
+        // periodieke taken (aparte agenda)
         periodicJson:"https://script.google.com/macros/s/AKfycbxEDSHzBOrrYqkNOCQI6clM6DNuoge55tdATn1XNC63HT7GgPcsZF5AT3dwfaLjEUmV/exec",
+        // containers uit agenda
         containersJson:"https://script.google.com/macros/s/AKfycbwPQ1WsRqrJmRuYD8bL6kz5H5sSDNcBsIa0z-WW4hain7fkVhM6HIUQI3DHyhpn-C1zHQ/exec"
       },
       refreshMs:15000
     };
 
-    /* 0=zo, 1=ma, 2=di, 3=wo, 4=do, 5=vr, 6=za */
-    /* ✅ nu: woensdag (3), vrijdag (5), zondag (0) */
+    /* ===== Emballage vast schema (0=zo..6=za) — NIET uit agenda =====
+       Jij wilt: woensdag (3), vrijdag (5), zondag (0)
+    */
     const EMBALLAGE_SCHEDULE = {
-      0: ["Bidfood emballage klaarzetten", "Gele Zusje kratten klaarzetten"],
-      3: ["Bidfood emballage klaarzetten"],
-      5: ["Bidfood emballage klaarzetten"]
+      0: ["Bidfood emballage klaarzetten"],  // zondag
+      3: ["Bidfood emballage klaarzetten"],  // woensdag
+      5: ["Bidfood emballage klaarzetten"]   // vrijdag
     };
 
+    /* ===== Containers fallback ===== */
     const FALLBACK_CONTAINERS = {
       0: ["Restafval containers klaarzetten"],
       1: ["Glas containers klaarzetten"],
@@ -159,7 +196,12 @@
       5: [],
       6: []
     };
+    const THURSDAY_PLASTIC_LABEL = "Plastic containers klaarzetten";
 
+    /* ===== Gele kratten: om de week op maandag, start 2025-11-17 ===== */
+    const GKR_START = new Date("2025-11-17T00:00:00"); // maandag
+
+    /* ====== State ====== */
     const state={
       checklists:[],
       periodicTasks:[],
@@ -173,13 +215,16 @@
     };
     let containersData = null;
 
+    /* ====== Helpers ====== */
     const $=sel=>document.querySelector(sel);
     const pad=n=>String(n).padStart(2,"0");
     const getOpsDate=d=>{const x=new Date(d||Date.now());if(x.getHours()<4)x.setDate(x.getDate()-1);return x;};
     const fmtDutchDate=d=>d.toLocaleDateString("nl-NL",{weekday:"long",day:"2-digit",month:"long"});
     const weekNumber=d=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fT=new Date(Date.UTC(t.getUTCFullYear(),0,4));return 1+Math.round(((t-fT)/86400000-3+((fT.getUTCDay()+6)%7))/7);};
     const isEvenWeek=d=>weekNumber(d)%2===0;
+    const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':'zd-open'}">${label||""}</span>`;
 
+    /* ====== Data fetchers ====== */
     async function fetchChecklists(){
       try{
         const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store"});
@@ -200,14 +245,7 @@
         const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});
         if(r.ok){
           const j=await r.json();
-          state.periodicTasks=(j&&j.ok&&Array.isArray(j.items))
-            ? j.items.map(ev=>({
-                title: ev.title,
-                start: ev.start || null,
-                end:   ev.end   || null,
-                allDay: !!ev.allDay
-              }))
-            : [];
+          state.periodicTasks=(j && j.ok && Array.isArray(j.items)) ? j.items : [];
         }
       }catch(e){ console.warn("Periodic fail",e); }
     }
@@ -231,6 +269,7 @@
       renderAll();
     }
 
+    /* ====== Renderers ====== */
     function renderHeader(){
       const n=new Date(), ops=getOpsDate(n);
       $("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
@@ -240,33 +279,58 @@
     function renderChecklists(){
       const list=$("#zd-checklistList"); list.innerHTML="";
       if(!state.checklists.length){
-        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div class="zd-chip zd-open">—</div></div>`;
+        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`;
         return;
       }
       state.checklists.forEach(c=>{
         const el=document.createElement("div"); el.className="zd-item";
-        el.innerHTML=`<div class="zd-name">${c.name}</div><div class="zd-chip ${c.done?'zd-ok':'zd-open'}">${c.done?'✔ Gereed':'Nog doen'}</div>`;
+        el.innerHTML=`<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;
         list.appendChild(el);
       });
     }
 
+    // ← aangepaste versie met horecadag-filter en alleen tijden tonen als ze er zijn
     function renderPeriodic(){
-      const list=$("#zd-periodicList"); list.innerHTML="";
-      const t=state.periodicTasks||[];
-      if(!t.length){
-        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen periodieke taken</div></div>`;
+      const list = $("#zd-periodicList");
+      list.innerHTML = "";
+
+      const ops = getOpsDate(new Date());
+      const opsY = ops.getFullYear();
+      const opsM = ops.getMonth();
+      const opsD = ops.getDate();
+      const tf = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute:'2-digit' });
+
+      const items = state.periodicTasks || [];
+      if (!items.length) {
+        list.innerHTML = `<div class="zd-item"><div class="zd-name">Geen periodieke taken</div></div>`;
         return;
       }
-      const tf = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute:'2-digit' });
-      t.forEach(x=>{
+
+      const todays = items.filter(ev => {
+        if (!ev.start) return true; // laat simpele all-day zonder start toe
+        const s = new Date(ev.start);
+        return (
+          s.getFullYear() === opsY &&
+          s.getMonth() === opsM &&
+          s.getDate() === opsD
+        );
+      });
+
+      if (!todays.length) {
+        list.innerHTML = `<div class="zd-item"><div class="zd-name">Geen periodieke taken</div></div>`;
+        return;
+      }
+
+      todays.forEach(x => {
         let timePart = "";
-        if(!x.allDay && x.start){
+        if (!x.allDay && x.start) {
           const s = new Date(x.start);
           const e = x.end ? new Date(x.end) : null;
           timePart = ` <em>${tf.format(s)}${e ? "–"+tf.format(e) : ""}</em>`;
         }
-        const el=document.createElement("div"); el.className="zd-item";
-        el.innerHTML=`<div class="zd-name">${x.title}${timePart}</div>`;
+        const el = document.createElement("div");
+        el.className = "zd-item";
+        el.innerHTML = `<div class="zd-name">${x.title}${timePart}</div>`;
         list.appendChild(el);
       });
     }
@@ -285,12 +349,22 @@
         else{const [h,m]=(r.deadline||"23:59").split(":").map(Number);limit.setHours(h,m||0,0,0);}
         const diff=Math.round((limit-n)/60000);
         let lab=`vóór ${r.deadline}`;
-        if(diff<0){lab="Te laat";}
-        else if(diff<=60){lab=`Binnen ${diff}m`;}
+        if(diff<0){ lab="Te laat"; }
+        else if(diff<=60){ lab=`Binnen ${diff}m`; }
         const el=document.createElement("div"); el.className="zd-item";
         el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div>`;
         wrap.appendChild(el);
       });
+    }
+
+    function shouldShowGeleKratten(ops){
+      // alleen op maandag checken
+      if (ops.getDay() !== 1) return false;
+      const dayStart = new Date(ops.getFullYear(), ops.getMonth(), ops.getDate());
+      const diffMs = dayStart - GKR_START;
+      if (diffMs < 0) return false;
+      const diffDays = Math.floor(diffMs / 86400000);
+      return (diffDays % 14) === 0;
     }
 
     function renderContainers(){
@@ -301,9 +375,13 @@
 
       const ops=getOpsDate(new Date()), dow=ops.getDay();
 
-      /* Emballage: nu wo, vr, zo */
+      /* Emballage: vast schema + gele kratten om de week (ma) */
       const emballage = EMBALLAGE_SCHEDULE[dow] ? [...EMBALLAGE_SCHEDULE[dow]] : [];
+      if (shouldShowGeleKratten(ops)) {
+        emballage.push("Gele Zusje kratten klaarzetten");
+      }
 
+      /* Containers: agenda eerst, anders fallback */
       let containers = [];
       if (containersData) {
         if (Array.isArray(containersData.containers)) {
@@ -311,21 +389,20 @@
         } else if (Array.isArray(containersData.items)) {
           containersData.items.forEach(it=>{
             const title = String(it.title || it.name || "").trim();
-            const cat   = String(it.category || it.type || "").toLowerCase();
             if(!title) return;
-            if (cat.includes("container") || cat.includes("afval") || cat.includes("pm") || cat.includes("glas") || cat.includes("papier")) {
-              containers.push(title);
-            }
+            // simpele filter
+            containers.push(title);
           });
         }
       }
       if (containers.length === 0) {
         containers = FALLBACK_CONTAINERS[dow] ? [...FALLBACK_CONTAINERS[dow]] : [];
-        if (dow === 4 && (weekNumber(ops)%2===0)) {
-          if(!containers.includes("Plastic containers klaarzetten")) containers.push("Plastic containers klaarzetten");
+        if (dow === 4 && isEvenWeek(ops)) {
+          if(!containers.includes(THURSDAY_PLASTIC_LABEL)) containers.push(THURSDAY_PLASTIC_LABEL);
         }
       }
 
+      /* Render zonder chips */
       if (containers.length === 0){
         lc.innerHTML = `<div class="zd-item"><div class="zd-name">—</div></div>`;
       } else {
@@ -356,6 +433,7 @@
       fitFrame();
     }
 
+    /* ====== Schalen voor 1080p ====== */
     const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 18;
     function fitFrame(){
       const shell = document.getElementById('dashboard-shell');
@@ -375,6 +453,7 @@
       frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
 
+    /* ====== Fullscreen met 'F' ====== */
     async function toggleFS(){
       try{
         if(document.fullscreenElement){
@@ -388,12 +467,14 @@
     }
     document.addEventListener('keydown', (e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
 
+    /* ====== Hooks ====== */
     window.addEventListener('resize', fitFrame);
     window.addEventListener('orientationchange', fitFrame);
     document.addEventListener('fullscreenchange', fitFrame);
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) fitFrame(); });
     if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
 
+    /* ====== Init ====== */
     fitFrame(); renderHeader(); loadAll();
     setInterval(()=>{ renderHeader(); fitFrame(); },1000);
     setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
