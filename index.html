@@ -9,7 +9,6 @@
       -webkit-text-size-adjust:100%; text-size-adjust:100%;
     }
 
-    /* Shell vult venster, geen scroll */
     #dashboard-shell{
       position:fixed; inset:0;
       background:#f3f6fb;
@@ -17,7 +16,6 @@
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
     }
 
-    /* Vast canvas dat we schalen — 1920×1080 (1080p) */
     .zd-stage{ position:relative; width:100%; height:100%; }
     .zd-frame{
       position:absolute;
@@ -28,7 +26,6 @@
       will-change: transform;
     }
 
-    /* UI */
     .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
     .zd-title{ font-weight:900; font-size:72px; letter-spacing:.2px; background:linear-gradient(90deg,#2563eb,#06b6d4); -webkit-background-clip:text; background-clip:text; color:transparent; }
@@ -36,7 +33,6 @@
     .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:120px; color:#0f172a; text-align:right; line-height:1; }
     .zd-date{ color:#60708d; font-size:30px; text-align:right; }
 
-    /* 3 kolommen vast */
     .zd-grid{
       display:grid; gap:24px;
       grid-template-columns: repeat(12, 1fr);
@@ -61,7 +57,6 @@
     .zd-name{ font-weight:800; letter-spacing:.2px; font-size:30px; color:#0b1220; }
     .zd-name em{ font-style:normal; color:#64748b; font-weight:700; }
 
-    /* Alleen nodig in Checklisten (andere panelen tonen geen knoppen) */
     .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:22px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
     .zd-ok{   color:#065f46; border-color:rgba(16,185,129,.35); background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
     .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
@@ -83,7 +78,6 @@
             </div>
           </div>
 
-          <!-- 3 kolommen -->
           <div class="zd-grid">
             <!-- Kolom 1: Checklisten -->
             <div class="zd-col-4">
@@ -139,7 +133,6 @@
 
   <script>
   (function(){
-    /* ====== Endpoints ====== */
     const CONFIG = {
       sheets:{
         checklistsJson:"https://script.google.com/macros/s/AKfycbw_Tn0z0s3AJ7CARzHt9sFy8CGhrCe_HzS9ao0KKDtgzq9TR_H-28WBss316I6PDcr7/exec",
@@ -149,14 +142,14 @@
       refreshMs:15000
     };
 
-    /* ===== Emballage vast schema (0=zo..6=za) — NIET uit agenda ===== */
+    /* 0=zo, 1=ma, 2=di, 3=wo, 4=do, 5=vr, 6=za */
+    /* ✅ nu: woensdag (3), vrijdag (5), zondag (0) */
     const EMBALLAGE_SCHEDULE = {
-      1: ["Bidfood emballage klaarzetten", "Gele Zusje kratten klaarzetten"],
+      0: ["Bidfood emballage klaarzetten", "Gele Zusje kratten klaarzetten"],
       3: ["Bidfood emballage klaarzetten"],
       5: ["Bidfood emballage klaarzetten"]
     };
 
-    /* ===== Containers fallback als agenda niets geeft ===== */
     const FALLBACK_CONTAINERS = {
       0: ["Restafval containers klaarzetten"],
       1: ["Glas containers klaarzetten"],
@@ -167,7 +160,6 @@
       6: []
     };
 
-    /* ====== State ====== */
     const state={
       checklists:[],
       periodicTasks:[],
@@ -181,7 +173,6 @@
     };
     let containersData = null;
 
-    /* ====== Helpers ====== */
     const $=sel=>document.querySelector(sel);
     const pad=n=>String(n).padStart(2,"0");
     const getOpsDate=d=>{const x=new Date(d||Date.now());if(x.getHours()<4)x.setDate(x.getDate()-1);return x;};
@@ -189,7 +180,6 @@
     const weekNumber=d=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fT=new Date(Date.UTC(t.getUTCFullYear(),0,4));return 1+Math.round(((t-fT)/86400000-3+((fT.getUTCDay()+6)%7))/7);};
     const isEvenWeek=d=>weekNumber(d)%2===0;
 
-    /* ====== Data ====== */
     async function fetchChecklists(){
       try{
         const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store"});
@@ -202,7 +192,6 @@
       }catch(e){ console.warn("Checklist fetch fail",e); }
     }
 
-    /* Periodieke taken: bewaar start/eind (tijden renderen alleen bij niet-hele-dag) */
     async function fetchPeriodic(){
       const u=CONFIG.sheets.periodicJson;
       if(!u) return;
@@ -242,7 +231,6 @@
       renderAll();
     }
 
-    /* ====== Render ====== */
     function renderHeader(){
       const n=new Date(), ops=getOpsDate(n);
       $("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
@@ -262,7 +250,6 @@
       });
     }
 
-    /* Periodiek: toon alleen tijden als het NIET all-day is */
     function renderPeriodic(){
       const list=$("#zd-periodicList"); list.innerHTML="";
       const t=state.periodicTasks||[];
@@ -284,7 +271,6 @@
       });
     }
 
-    /* Bestellen-lijst (zonder extra knoppen) */
     function renderOrders(){
       const wrap=$("#zd-ordersList"); wrap.innerHTML="";
       const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);
@@ -307,7 +293,6 @@
       });
     }
 
-    /* Containers & Emballage (zonder extra knoppen) */
     function renderContainers(){
       const lc = $("#zd-wasteContainers");
       const le = $("#zd-wasteEmballage");
@@ -316,10 +301,9 @@
 
       const ops=getOpsDate(new Date()), dow=ops.getDay();
 
-      /* Emballage: vast schema */
+      /* Emballage: nu wo, vr, zo */
       const emballage = EMBALLAGE_SCHEDULE[dow] ? [...EMBALLAGE_SCHEDULE[dow]] : [];
 
-      /* Containers: agenda eerst, anders fallback */
       let containers = [];
       if (containersData) {
         if (Array.isArray(containersData.containers)) {
@@ -372,9 +356,7 @@
       fitFrame();
     }
 
-    /* ====== Schalen voor 1080p ====== */
     const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 18;
-
     function fitFrame(){
       const shell = document.getElementById('dashboard-shell');
       const frame = document.getElementById('zd-frame');
@@ -393,7 +375,6 @@
       frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
 
-    /* ====== Fullscreen met 'F' ====== */
     async function toggleFS(){
       try{
         if(document.fullscreenElement){
@@ -407,14 +388,12 @@
     }
     document.addEventListener('keydown', (e)=>{ if((e.key||'').toLowerCase()==='f') toggleFS(); });
 
-    /* ====== Hooks ====== */
     window.addEventListener('resize', fitFrame);
     window.addEventListener('orientationchange', fitFrame);
     document.addEventListener('fullscreenchange', fitFrame);
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) fitFrame(); });
     if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
 
-    /* ====== Init ====== */
     fitFrame(); renderHeader(); loadAll();
     setInterval(()=>{ renderHeader(); fitFrame(); },1000);
     setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
