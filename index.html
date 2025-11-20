@@ -255,18 +255,35 @@
     };
     const isEvenWeek = d=>weekNumber(d)%2===0;
 
-    const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
-
+    // YMD-string (YYYY-MM-DD) van NU met horecadag-cutoff
     const opsDateStrToday = ()=>{
       const d = getOpsDate(new Date());
-      return d.toISOString().slice(0,10); // YYYY-MM-DD
-    };
-
-    const opsDateStrOf = (dateLike)=>{
-      if(!dateLike) return null;
-      const d = getOpsDate(new Date(dateLike));
       return d.toISOString().slice(0,10);
     };
+
+    // YMD in Europe/Amsterdam voor een event-start (zonder 04:00-shift op het event zelf)
+    const ymdInAmsterdam = (dateLike)=>{
+      const tz="Europe/Amsterdam";
+      if(!dateLike) return null;
+      if(typeof dateLike==="string" && /^\d{4}-\d{2}-\d{2}/.test(dateLike)){
+        // All-day "YYYY-MM-DD" → direct gebruiken
+        return dateLike.slice(0,10);
+      }
+      const d = new Date(dateLike);
+      if(isNaN(d)) return null;
+      const parts = new Intl.DateTimeFormat("nl-NL",{
+        timeZone: tz, year:"numeric", month:"2-digit", day:"2-digit"
+      }).formatToParts(d);
+      let y,m,da;
+      for(const p of parts){
+        if(p.type==="year") y=p.value;
+        else if(p.type==="month") m=p.value;
+        else if(p.type==="day") da=p.value;
+      }
+      return (y && m && da) ? `${y}-${m}-${da}` : null;
+    };
+
+    const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
 
     /* ====== Data ====== */
     async function fetchChecklists(){
@@ -291,14 +308,15 @@
         const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});
         if(r.ok){
           const j=await r.json();
-          let items=(j&&j.ok&&Array.isArray(j.items))?j.items:[];
+          let items=(j && j.ok && Array.isArray(j.items)) ? j.items : [];
           const todayStr = opsDateStrToday();
 
-          // Filter op horecadag t/m 04:00 als er een datum staat
+          // Filter: toon alleen items waarvan de kalender-datum in Amsterdam gelijk is aan de horecadag
           items = items.filter(ev=>{
             const s = ev.start || ev.startTime || ev.date || ev.dateISO;
-            if(!s) return true; // geen datum → gewoon tonen
-            const evStr = opsDateStrOf(s);
+            if(!s) return true; // geen datum → tonen
+            const evStr = ymdInAmsterdam(s);
+            if(!evStr) return false;
             return evStr === todayStr;
           });
 
@@ -315,7 +333,6 @@
       const url = CONFIG.sheets.containersJson;
       if(!url) return null;
       try{
-        // optioneel tz-parameter; Apps Script mag het negeren
         const sep=url.includes("?")?"&":"?";
         const r = await fetch(url+sep+"tz=Europe/Amsterdam",{cache:"no-store"});
         if(!r.ok) throw new Error("HTTP "+r.status);
@@ -415,7 +432,9 @@
     function isYellowCratesDay(ops){
       const start = new Date(YELLOW_CRATES_START + "T00:00:00");
       const msPerDay = 24*60*60*1000;
-      const daysDiff = Math.floor((ops.setHours(0,0,0,0) - start.getTime())/msPerDay);
+      const opsMid = new Date(ops);
+      opsMid.setHours(0,0,0,0);
+      const daysDiff = Math.floor((opsMid - start.getTime())/msPerDay);
       if(daysDiff < 0) return false;
       const weeksDiff = Math.floor(daysDiff / 7);
       return weeksDiff % 2 === 0; // om de week
@@ -434,26 +453,25 @@
 
       /* Emballage: vast schema + gele kratten (om de week op maandag) */
       const emballage = EMBALLAGE_SCHEDULE[dow] ? [...EMBALLAGE_SCHEDULE[dow]] : [];
-      if(dow===1 && isYellowCratesDay(new Date(ops))){ // maandag
+      if(dow===1 && isYellowCratesDay(ops)){ // maandag
         emballage.push("Gele Zusje kratten klaarzetten");
       }
 
       /* Containers: agenda eerst, anders fallback */
       let containers = [];
       if (containersData) {
-        // Als script events met datum teruggeeft:
         if (Array.isArray(containersData.items)) {
           containers = containersData.items
             .filter(it=>{
               const s = it.start || it.startTime || it.date || it.dateISO;
               if(!s) return true;
-              const evStr = opsDateStrOf(s);
+              const evStr = ymdInAmsterdam(s);
+              if(!evStr) return false;
               return evStr === todayStr;
             })
             .map(it=> String(it.title || it.name || "").trim())
             .filter(Boolean);
         }
-        // Of simpel: {containers:["Papier container klaarzetten", ...]}
         else if (Array.isArray(containersData.containers)) {
           containers = containersData.containers.slice();
         }
@@ -500,7 +518,7 @@
       fitFrame();
     }
 
-    /* ====== Schalen voor 1080p (iets groter, maar binnen scherm) ====== */
+    /* ====== Schalen voor 1080p ====== */
     const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 8;
 
     function fitFrame(){
