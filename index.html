@@ -6,17 +6,12 @@
   <title>Zusje Roermond Dashboard</title>
   <style>
     html, body {
-      height:100%;
-      margin:0;
-      background:#000;
-      overflow:hidden;
-      -webkit-text-size-adjust:100%;
-      text-size-adjust:100%;
+      height:100%; margin:0; background:#000; overflow:hidden;
+      -webkit-text-size-adjust:100%; text-size-adjust:100%;
     }
 
     #dashboard-shell{
-      position:fixed;
-      inset:0;
+      position:fixed; inset:0;
       background:#f3f6fb;
       overflow:hidden;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
@@ -35,28 +30,34 @@
     .zd-wrap{ width:100%; height:100%; padding:28px; color:#0b1220; background:#f3f6fb; }
     .zd-header{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
     .zd-title{
-      font-weight:900;
-      font-size:52px;
-      letter-spacing:.2px;
+      font-weight:900; font-size:56px; letter-spacing:.2px;
       background:linear-gradient(90deg,#2563eb,#06b6d4);
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
+      -webkit-background-clip:text; background-clip:text; color:transparent;
     }
-    .zd-meta{ color:#60708d; font-size:20px; margin-top:8px; }
-    .zd-clock{ font-variant-numeric:tabular-nums; font-weight:900; font-size:90px; color:#0f172a; text-align:right; line-height:.95; }
+    .zd-meta{ color:#60708d; font-size:22px; margin-top:8px; }
+    .zd-clock{
+      font-variant-numeric:tabular-nums; font-weight:900;
+      font-size:64px; color:#0f172a; text-align:right;
+    }
     .zd-date{ color:#60708d; font-size:22px; text-align:right; }
 
     .zd-grid{
-      display:grid;
-      gap:24px;
+      display:grid; gap:24px;
       grid-template-columns: repeat(12, 1fr);
       height: calc(100% - 110px);
     }
     .zd-col-4{ grid-column:span 4; }
 
-    .zd-panel{ background:#eef2f7; border:1px solid #dde3ef; border-radius:28px; padding:14px; box-shadow:0 20px 50px rgba(15,23,42,.08); }
-    .zd-card{ background:#ffffff; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 10px 28px rgba(15,23,42,.10); display:flex; flex-direction:column; overflow:hidden; min-height:170px; }
+    .zd-panel{
+      background:#eef2f7; border:1px solid #dde3ef;
+      border-radius:28px; padding:14px;
+      box-shadow:0 20px 50px rgba(15,23,42,.08);
+    }
+    .zd-card{
+      background:#ffffff; border:1px solid #e5e7eb; border-radius:22px;
+      box-shadow:0 10px 28px rgba(15,23,42,.10);
+      display:flex; flex-direction:column; overflow:hidden; min-height:170px;
+    }
     .zd-band{ height:10px; width:100%; }
     .zd-band-check{  background:linear-gradient(90deg,#2563eb,#7ea5ff); }
     .zd-band-period{ background:linear-gradient(90deg,#0ea5a4,#8cf2e8); }
@@ -64,28 +65,44 @@
     .zd-band-waste{  background:linear-gradient(90deg,#16a34a,#a7f3d0); }
 
     .zd-card-h{
-      padding:18px 20px;
-      border-bottom:1px solid #eef2f7;
-      font-weight:900;
-      font-size:24px;
-      color:#0f172a;
+      padding:18px 20px; border-bottom:1px solid #eef2f7;
+      font-weight:900; font-size:26px; color:#0f172a;
       background:linear-gradient(#ffffff,#fbfdff);
-      display:flex;
-      align-items:center;
-      gap:10px;
+      display:flex; align-items:center; gap:10px;
     }
-    .zd-tag{ margin-left:auto; font-size:12px; font-weight:800; color:#0b1220; padding:6px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#eef6ff; }
-    .zd-card-b{ padding:20px; gap:14px; display:flex; flex-direction:column; flex:1; overflow:auto; }
+    .zd-tag{
+      margin-left:auto; font-size:14px; font-weight:800; color:#0b1220;
+      padding:6px 12px; border-radius:999px;
+      border:1px solid #e5e7eb; background:#eef6ff;
+    }
+    .zd-card-b{
+      padding:20px; gap:14px; display:flex;
+      flex-direction:column; flex:1; overflow:auto;
+    }
 
     .zd-list{ display:flex; flex-direction:column; gap:12px; }
-    .zd-item{ display:flex; align-items:center; justify-content:space-between; background:#f8fafc; padding:16px 18px; border-radius:14px; border:1px solid #e5e7eb; }
-    .zd-name{ font-weight:800; letter-spacing:.2px; font-size:20px; color:#0b1220; }
+    .zd-item{
+      display:flex; align-items:center; justify-content:space-between;
+      background:#f8fafc; padding:16px 18px;
+      border-radius:14px; border:1px solid #e5e7eb;
+    }
+    .zd-name{
+      font-weight:800; letter-spacing:.2px;
+      font-size:22px; color:#0b1220;
+    }
     .zd-name em{ font-style:normal; color:#64748b; font-weight:700; }
 
-    .zd-chip{ display:inline-flex; align-items:center; gap:8px; font-weight:900; font-size:16px; line-height:1; padding:10px 14px; border-radius:999px; border:1px solid transparent; box-shadow:0 6px 16px rgba(0,0,0,.06); }
+    .zd-chip{
+      display:inline-flex; align-items:center; gap:8px;
+      font-weight:900; font-size:18px; line-height:1;
+      padding:10px 14px; border-radius:999px;
+      border:1px solid transparent;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
     .zd-ok{   color:#065f46; border-color:rgba(16,185,129,.35); background:linear-gradient(180deg,#d1fae5,#a7f3d0); }
+    .zd-warn{ color:#7c2d12; border-color:rgba(245,158,11,.4);  background:linear-gradient(180deg,#fef3c7,#fde68a); }
+    .zd-bad{  color:#7f1d1d; border-color:rgba(239,68,68,.4);   background:linear-gradient(180deg,#fee2e2,#fecaca); }
     .zd-open{ color:#023047; border-color:rgba(6,182,212,.35);  background:linear-gradient(180deg,#cffafe,#bae6fd); }
-
   </style>
 </head>
 <body>
@@ -104,6 +121,7 @@
             </div>
           </div>
 
+          <!-- 3 kolommen -->
           <div class="zd-grid">
             <!-- Kolom 1: Checklisten -->
             <div class="zd-col-4">
@@ -111,7 +129,9 @@
                 <section class="zd-card">
                   <div class="zd-band zd-band-check"></div>
                   <div class="zd-card-h">Checklisten <span class="zd-tag">Team</span></div>
-                  <div class="zd-card-b"><div class="zd-list" id="zd-checklistList"></div></div>
+                  <div class="zd-card-b">
+                    <div class="zd-list" id="zd-checklistList"></div>
+                  </div>
                 </section>
               </div>
             </div>
@@ -138,20 +158,24 @@
               </div>
             </div>
 
-            <!-- Kolom 3: Periodiek + Bestellen -->
+            <!-- Kolom 3: Dagnotities + Bestellen -->
             <div class="zd-col-4">
               <div class="zd-panel" style="margin-bottom:24px;">
                 <section class="zd-card">
                   <div class="zd-band zd-band-period"></div>
                   <div class="zd-card-h">Dagnotities en extra taken <span class="zd-tag">Schema</span></div>
-                  <div class="zd-card-b"><div class="zd-list" id="zd-periodicList"></div></div>
+                  <div class="zd-card-b">
+                    <div class="zd-list" id="zd-periodicList"></div>
+                  </div>
                 </section>
               </div>
               <div class="zd-panel">
                 <section class="zd-card">
                   <div class="zd-band zd-band-orders"></div>
                   <div class="zd-card-h">Bestellen (vandaag) <span class="zd-tag">Deadlines</span></div>
-                  <div class="zd-card-b"><div class="zd-list" id="zd-ordersList"></div></div>
+                  <div class="zd-card-b">
+                    <div class="zd-list" id="zd-ordersList"></div>
+                  </div>
                 </section>
               </div>
             </div>
@@ -163,6 +187,7 @@
 
   <script>
   (function(){
+    /* ====== Endpoints ====== */
     const CONFIG = {
       sheets:{
         checklistsJson:"https://script.google.com/macros/s/AKfycbw_Tn0z0s3AJ7CARzHt9sFy8CGhrCe_HzS9ao0KKDtgzq9TR_H-28WBss316I6PDcr7/exec",
@@ -172,61 +197,87 @@
       refreshMs:15000
     };
 
-    /* Emballage (0=zo..6=za): wo, vr, zo */
+    /* ===== Emballage vast schema (0=zo..6=za) ===== */
     const EMBALLAGE_SCHEDULE = {
-      0: ["Bidfood emballage klaarzetten"],  // zondag
-      3: ["Bidfood emballage klaarzetten"],  // woensdag
-      5: ["Bidfood emballage klaarzetten"]   // vrijdag
+      0: ["Bidfood emballage klaarzetten"],   // zondag
+      3: ["Bidfood emballage klaarzetten"],   // woensdag
+      5: ["Bidfood emballage klaarzetten"]    // vrijdag
     };
 
+    /* Containers fallback (als agenda niets geeft) */
     const FALLBACK_CONTAINERS = {
-      0: ["Restafval containers klaarzetten"],
-      1: ["Glas containers klaarzetten"],
-      2: ["Restafval containers klaarzetten"],
-      3: [],
-      4: ["Papier container klaarzetten"],
-      5: [],
-      6: []
+      0: ["Restafval containers klaarzetten"], // zo
+      1: ["Glas containers klaarzetten"],      // ma
+      2: ["Restafval containers klaarzetten"], // di
+      3: [],                                   // wo
+      4: ["Papier container klaarzetten"],     // do
+      5: [],                                   // vr
+      6: []                                    // za
     };
     const THURSDAY_PLASTIC_LABEL = "Plastic containers klaarzetten";
 
-    /* Gele kratten: om de week op maandag, start 2025-11-17 */
-    const GKR_START = new Date("2025-11-17T00:00:00");
+    /* Gele Zusje kratten: om de week op maandag, start 2025-11-17 */
+    const YELLOW_CRATES_START = "2025-11-17";
 
+    /* ====== State ====== */
     const state={
       checklists:[],
       periodicTasks:[],
       ordersRules:[
-        {vendor:"Bidfood",weekdays:[2],deadline:"00:00"},
+        {vendor:"Bidfood",weekdays:[2],deadline:"00:00"},              // di
         {vendor:"Bubbels",weekdays:[3],deadline:"23:00",evenWeeks:true},
         {vendor:"Zusje Kantoor",weekdays:[3],deadline:"23:00",evenWeeks:true},
-        {vendor:"Bidfood",weekdays:[4],deadline:"00:00"},
-        {vendor:"Bidfood",weekdays:[6],deadline:"00:00"}
+        {vendor:"Bidfood",weekdays:[4],deadline:"00:00"},              // do
+        {vendor:"Bidfood",weekdays:[6],deadline:"00:00"}               // za
       ]
     };
     let containersData = null;
 
+    /* ====== Helpers ====== */
     const $=sel=>document.querySelector(sel);
     const pad=n=>String(n).padStart(2,"0");
-    const getOpsDate=d=>{const x=new Date(d||Date.now());if(x.getHours()<4)x.setDate(x.getDate()-1);return x;};
-    const fmtDutchDate=d=>d.toLocaleDateString("nl-NL",{weekday:"long",day:"2-digit",month:"long"});
-    const weekNumber=d=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fT=new Date(Date.UTC(t.getUTCDullYear(),0,4));return 1+Math.round(((t-fT)/86400000-3+((fT.getUTCDay()+6)%7))/7);};
-    const isEvenWeek=d=>weekNumber(d)%2===0;
-    const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':'zd-open'}">${label||""}</span>`;
 
-    function sameDay(a,b){
-      return a.getFullYear()===b.getFullYear()
-          && a.getMonth()===b.getMonth()
-          && a.getDate()===b.getDate();
-    }
+    // Horecadag t/m 04:00
+    const getOpsDate = (d)=>{
+      const x=new Date(d||Date.now());
+      if(x.getHours()<4) x.setDate(x.getDate()-1);
+      return x;
+    };
 
+    const fmtDutchDate = d=>d.toLocaleDateString("nl-NL",{weekday:"long",day:"2-digit",month:"long"});
+
+    const weekNumber = d=>{
+      const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+      const dn=(t.getUTCDay()+6)%7;
+      t.setUTCDate(t.getUTCDate()-dn+3);
+      const fT=new Date(Date.UTC(t.getUTCFullYear(),0,4));
+      return 1+Math.round(((t-fT)/86400000-3+((fT.getUTCDay()+6)%7))/7);
+    };
+    const isEvenWeek = d=>weekNumber(d)%2===0;
+
+    const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':type==='warn'?'zd-warn':type==='bad'?'zd-bad':'zd-open'}">${label||""}</span>`;
+
+    const opsDateStrToday = ()=>{
+      const d = getOpsDate(new Date());
+      return d.toISOString().slice(0,10); // YYYY-MM-DD
+    };
+
+    const opsDateStrOf = (dateLike)=>{
+      if(!dateLike) return null;
+      const d = getOpsDate(new Date(dateLike));
+      return d.toISOString().slice(0,10);
+    };
+
+    /* ====== Data ====== */
     async function fetchChecklists(){
       try{
         const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store"});
         if(r.ok){
           const j=await r.json();
           if(Array.isArray(j.items)){
-            state.checklists=j.items.map(it=>({name:String(it.name||"").trim(),done:!!it.done})).filter(x=>x.name);
+            state.checklists=j.items
+              .map(it=>({name:String(it.name||"").trim(),done:!!it.done}))
+              .filter(x=>x.name);
           }
         }
       }catch(e){ console.warn("Checklist fetch fail",e); }
@@ -240,7 +291,22 @@
         const r=await fetch(u+sep+"tz=Europe/Amsterdam",{cache:"no-store"});
         if(r.ok){
           const j=await r.json();
-          state.periodicTasks=(j && j.ok && Array.isArray(j.items)) ? j.items : [];
+          let items=(j&&j.ok&&Array.isArray(j.items))?j.items:[];
+          const todayStr = opsDateStrToday();
+
+          // Filter op horecadag t/m 04:00 als er een datum staat
+          items = items.filter(ev=>{
+            const s = ev.start || ev.startTime || ev.date || ev.dateISO;
+            if(!s) return true; // geen datum → gewoon tonen
+            const evStr = opsDateStrOf(s);
+            return evStr === todayStr;
+          });
+
+          state.periodicTasks = items.map(ev=>({
+            title: ev.title,
+            allDay: !!ev.allDay,
+            start: ev.start || ev.startTime || ev.date || ev.dateISO || null
+          }));
         }
       }catch(e){ console.warn("Periodic fail",e); }
     }
@@ -249,7 +315,9 @@
       const url = CONFIG.sheets.containersJson;
       if(!url) return null;
       try{
-        const r = await fetch(url, { cache:"no-store" });
+        // optioneel tz-parameter; Apps Script mag het negeren
+        const sep=url.includes("?")?"&":"?";
+        const r = await fetch(url+sep+"tz=Europe/Amsterdam",{cache:"no-store"});
         if(!r.ok) throw new Error("HTTP "+r.status);
         return await r.json();
       }catch(e){
@@ -259,11 +327,16 @@
     }
 
     async function loadAll(){
-      const [a,b,c] = await Promise.allSettled([fetchChecklists(),fetchPeriodic(),fetchContainers()]);
+      const [a,b,c] = await Promise.allSettled([
+        fetchChecklists(),
+        fetchPeriodic(),
+        fetchContainers()
+      ]);
       containersData = (c && c.status==="fulfilled") ? c.value : null;
       renderAll();
     }
 
+    /* ====== Render ====== */
     function renderHeader(){
       const n=new Date(), ops=getOpsDate(n);
       $("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
@@ -271,58 +344,47 @@
     }
 
     function renderChecklists(){
-      const list=$("#zd-checklistList"); list.innerHTML="";
+      const list=$("#zd-checklistList");
+      list.innerHTML="";
       if(!state.checklists.length){
         list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen checklists gevonden</div><div>${chip("open","—")}</div></div>`;
         return;
       }
       state.checklists.forEach(c=>{
-        const el=document.createElement("div"); el.className="zd-item";
+        const el=document.createElement("div");
+        el.className="zd-item";
         el.innerHTML=`<div class="zd-name">${c.name}</div><div>${c.done?chip("ok","✔ Gereed"):chip("open","Nog doen")}</div>`;
         list.appendChild(el);
       });
     }
 
     function renderPeriodic(){
-      const list = $("#zd-periodicList");
-      list.innerHTML = "";
-
-      const ops = getOpsDate(new Date());
-      const tf = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute:'2-digit' });
-
-      const items = state.periodicTasks || [];
-      if (!items.length) {
-        list.innerHTML = `<div class="zd-item"><div class="zd-name">Geen periodieke taken</div></div>`;
+      const list=$("#zd-periodicList");
+      list.innerHTML="";
+      const t=state.periodicTasks||[];
+      if(!t.length){
+        list.innerHTML=`<div class="zd-item"><div class="zd-name">Geen dagnotities of extra taken</div></div>`;
         return;
       }
-
-      const todays = items.filter(ev => {
-        if (!ev.start) return true;
-        const s = new Date(ev.start);
-        return sameDay(s, ops);
-      });
-
-      if (!todays.length) {
-        list.innerHTML = `<div class="zd-item"><div class="zd-name">Geen periodieke taken</div></div>`;
-        return;
-      }
-
-      todays.forEach(x => {
-        let timePart = "";
-        if (!x.allDay && x.start) {
-          const s = new Date(x.start);
-          const e = x.end ? new Date(x.end) : null;
-          timePart = ` <em>${tf.format(s)}${e ? "–"+tf.format(e) : ""}</em>`;
+      t.forEach(x=>{
+        const el=document.createElement("div");
+        el.className="zd-item";
+        let prefix = "";
+        // Alleen tijden tonen als er echt tijden zijn (niet bij hele-dag)
+        if(x.start && !x.allDay){
+          const d = new Date(x.start);
+          const hh = pad(d.getHours());
+          const mm = pad(d.getMinutes());
+          prefix = `<em>${hh}:${mm}</em> — `;
         }
-        const el = document.createElement("div");
-        el.className = "zd-item";
-        el.innerHTML = `<div class="zd-name">${x.title}${timePart}</div>`;
+        el.innerHTML=`<div class="zd-name">${prefix}${x.title}</div>`;
         list.appendChild(el);
       });
     }
 
     function renderOrders(){
-      const wrap=$("#zd-ordersList"); wrap.innerHTML="";
+      const wrap=$("#zd-ordersList");
+      wrap.innerHTML="";
       const n=new Date(),ops=getOpsDate(n),dow=ops.getDay(),even=isEvenWeek(ops);
       const td=state.ordersRules.filter(r=>(r.weekdays||[]).includes(dow)&&(!r.evenWeeks||even));
       if(!td.length){
@@ -331,25 +393,32 @@
       }
       td.forEach(r=>{
         let limit=new Date(ops);
-        if(r.deadline==="00:00"){limit.setDate(limit.getDate()+1);limit.setHours(0,0,0,0);}
-        else{const [h,m]=(r.deadline||"23:59").split(":").map(Number);limit.setHours(h,m||0,0,0);}
+        if(r.deadline==="00:00"){
+          limit.setDate(limit.getDate()+1);
+          limit.setHours(0,0,0,0);
+        }else{
+          const [h,m]=(r.deadline||"23:59").split(":").map(Number);
+          limit.setHours(h,m||0,0,0);
+        }
         const diff=Math.round((limit-n)/60000);
-        let lab=`vóór ${r.deadline}`;
-        if(diff<0){ lab="Te laat"; }
-        else if(diff<=60){ lab=`Binnen ${diff}m`; }
-        const el=document.createElement("div"); el.className="zd-item";
+        let type="open",lab=`vóór ${r.deadline}`;
+        if(diff<0){type="bad";lab="Te laat";}
+        else if(diff<=60){type="warn";lab=`Binnen ${diff}m`;}
+
+        const el=document.createElement("div");
+        el.className="zd-item";
         el.innerHTML=`<div class="zd-name">${r.vendor} <em>— ${lab}</em></div>`;
         wrap.appendChild(el);
       });
     }
 
-    function shouldShowGeleKratten(ops){
-      if (ops.getDay() !== 1) return false;
-      const dayStart = new Date(ops.getFullYear(), ops.getMonth(), ops.getDate());
-      const diffMs = dayStart - GKR_START;
-      if (diffMs < 0) return false;
-      const diffDays = Math.floor(diffMs / 86400000);
-      return (diffDays % 14) === 0;
+    function isYellowCratesDay(ops){
+      const start = new Date(YELLOW_CRATES_START + "T00:00:00");
+      const msPerDay = 24*60*60*1000;
+      const daysDiff = Math.floor((ops.setHours(0,0,0,0) - start.getTime())/msPerDay);
+      if(daysDiff < 0) return false;
+      const weeksDiff = Math.floor(daysDiff / 7);
+      return weeksDiff % 2 === 0; // om de week
     }
 
     function renderContainers(){
@@ -358,27 +427,35 @@
       if(!lc || !le) return;
       lc.innerHTML=""; le.innerHTML="";
 
-      const ops=getOpsDate(new Date()), dow=ops.getDay();
+      const now = new Date();
+      const ops=getOpsDate(now);
+      const dow=ops.getDay();
+      const todayStr = opsDateStrToday();
 
+      /* Emballage: vast schema + gele kratten (om de week op maandag) */
       const emballage = EMBALLAGE_SCHEDULE[dow] ? [...EMBALLAGE_SCHEDULE[dow]] : [];
-      if (shouldShowGeleKratten(ops)) {
+      if(dow===1 && isYellowCratesDay(new Date(ops))){ // maandag
         emballage.push("Gele Zusje kratten klaarzetten");
       }
 
+      /* Containers: agenda eerst, anders fallback */
       let containers = [];
       if (containersData) {
-        if (Array.isArray(containersData.containers)) {
+        // Als script events met datum teruggeeft:
+        if (Array.isArray(containersData.items)) {
+          containers = containersData.items
+            .filter(it=>{
+              const s = it.start || it.startTime || it.date || it.dateISO;
+              if(!s) return true;
+              const evStr = opsDateStrOf(s);
+              return evStr === todayStr;
+            })
+            .map(it=> String(it.title || it.name || "").trim())
+            .filter(Boolean);
+        }
+        // Of simpel: {containers:["Papier container klaarzetten", ...]}
+        else if (Array.isArray(containersData.containers)) {
           containers = containersData.containers.slice();
-        } else if (Array.isArray(containersData.items)) {
-          containersData.items.forEach(it=>{
-            const title = String(it.title || it.name || "").trim();
-            if(!title) return;
-            const startStr = it.start || it.startDate || it.date;
-            if(!startStr) return;
-            const s = new Date(startStr);
-            if(!sameDay(s, ops)) return;
-            containers.push(title);
-          });
         }
       }
 
@@ -389,21 +466,25 @@
         }
       }
 
+      /* Render containers */
       if (containers.length === 0){
         lc.innerHTML = `<div class="zd-item"><div class="zd-name">—</div></div>`;
       } else {
         containers.forEach(n=>{
-          const el=document.createElement("div"); el.className="zd-item";
+          const el=document.createElement("div");
+          el.className="zd-item";
           el.innerHTML = `<div class="zd-name">${n}</div>`;
           lc.appendChild(el);
         });
       }
 
+      /* Render emballage */
       if (emballage.length === 0){
         le.innerHTML = `<div class="zd-item"><div class="zd-name">—</div></div>`;
       } else {
         emballage.forEach(n=>{
-          const el=document.createElement("div"); el.className="zd-item";
+          const el=document.createElement("div");
+          el.className="zd-item";
           el.innerHTML = `<div class="zd-name">${n}</div>`;
           le.appendChild(el);
         });
@@ -419,8 +500,8 @@
       fitFrame();
     }
 
-    /* Schalen: bijna schermvullend */
-    const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 4;
+    /* ====== Schalen voor 1080p (iets groter, maar binnen scherm) ====== */
+    const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 8;
 
     function fitFrame(){
       const shell = document.getElementById('dashboard-shell');
@@ -434,7 +515,7 @@
         (viewH - SAFE_MARGIN_PX) / FRAME_H
       );
 
-      const EXTRA_SHRINK = 0.99; // bijna volledig scherm
+      const EXTRA_SHRINK = 0.99;
       const scale = base * EXTRA_SHRINK;
 
       frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
@@ -459,7 +540,10 @@
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) fitFrame(); });
     if (document.fonts && document.fonts.ready) { document.fonts.ready.finally(fitFrame); }
 
-    fitFrame(); renderHeader(); loadAll();
+    /* ====== Init ====== */
+    fitFrame();
+    renderHeader();
+    loadAll();
     setInterval(()=>{ renderHeader(); fitFrame(); },1000);
     setInterval(()=>{ loadAll(); }, CONFIG.refreshMs);
   })();
