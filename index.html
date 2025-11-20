@@ -163,7 +163,6 @@
 
   <script>
   (function(){
-    /* ====== Endpoints ====== */
     const CONFIG = {
       sheets:{
         checklistsJson:"https://script.google.com/macros/s/AKfycbw_Tn0z0s3AJ7CARzHt9sFy8CGhrCe_HzS9ao0KKDtgzq9TR_H-28WBss316I6PDcr7/exec",
@@ -180,7 +179,6 @@
       5: ["Bidfood emballage klaarzetten"]   // vrijdag
     };
 
-    /* Containers fallback */
     const FALLBACK_CONTAINERS = {
       0: ["Restafval containers klaarzetten"],
       1: ["Glas containers klaarzetten"],
@@ -208,12 +206,11 @@
     };
     let containersData = null;
 
-    /* Helpers */
     const $=sel=>document.querySelector(sel);
     const pad=n=>String(n).padStart(2,"0");
     const getOpsDate=d=>{const x=new Date(d||Date.now());if(x.getHours()<4)x.setDate(x.getDate()-1);return x;};
     const fmtDutchDate=d=>d.toLocaleDateString("nl-NL",{weekday:"long",day:"2-digit",month:"long"});
-    const weekNumber=d=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fT=new Date(Date.UTC(t.getUTCFullYear(),0,4));return 1+Math.round(((t-fT)/86400000-3+((fT.getUTCDay()+6)%7))/7);};
+    const weekNumber=d=>{const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);const fT=new Date(Date.UTC(t.getUTCDullYear(),0,4));return 1+Math.round(((t-fT)/86400000-3+((fT.getUTCDay()+6)%7))/7);};
     const isEvenWeek=d=>weekNumber(d)%2===0;
     const chip=(type,label)=>`<span class="zd-chip ${type==='ok'?'zd-ok':'zd-open'}">${label||""}</span>`;
 
@@ -223,7 +220,6 @@
           && a.getDate()===b.getDate();
     }
 
-    /* Fetchers */
     async function fetchChecklists(){
       try{
         const r=await fetch(CONFIG.sheets.checklistsJson,{cache:"no-store"});
@@ -268,7 +264,6 @@
       renderAll();
     }
 
-    /* Renderers */
     function renderHeader(){
       const n=new Date(), ops=getOpsDate(n);
       $("#zd-clock").textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
@@ -302,7 +297,7 @@
       }
 
       const todays = items.filter(ev => {
-        if (!ev.start) return true; // simpele all-day zonder start
+        if (!ev.start) return true;
         const s = new Date(ev.start);
         return sameDay(s, ops);
       });
@@ -365,17 +360,14 @@
 
       const ops=getOpsDate(new Date()), dow=ops.getDay();
 
-      /* Emballage */
       const emballage = EMBALLAGE_SCHEDULE[dow] ? [...EMBALLAGE_SCHEDULE[dow]] : [];
       if (shouldShowGeleKratten(ops)) {
         emballage.push("Gele Zusje kratten klaarzetten");
       }
 
-      /* Containers uit agenda, gefilterd op zelfde dag als ops */
       let containers = [];
       if (containersData) {
         if (Array.isArray(containersData.containers)) {
-          // Als het Apps Script al filtert op vandaag
           containers = containersData.containers.slice();
         } else if (Array.isArray(containersData.items)) {
           containersData.items.forEach(it=>{
@@ -384,13 +376,12 @@
             const startStr = it.start || it.startDate || it.date;
             if(!startStr) return;
             const s = new Date(startStr);
-            if(!sameDay(s, ops)) return;      // << hier gaat het om
+            if(!sameDay(s, ops)) return;
             containers.push(title);
           });
         }
       }
 
-      /* Fallback als agenda niets geeft */
       if (containers.length === 0) {
         containers = FALLBACK_CONTAINERS[dow] ? [...FALLBACK_CONTAINERS[dow]] : [];
         if (dow === 4 && isEvenWeek(ops)) {
@@ -398,7 +389,6 @@
         }
       }
 
-      /* Render zonder chips */
       if (containers.length === 0){
         lc.innerHTML = `<div class="zd-item"><div class="zd-name">—</div></div>`;
       } else {
@@ -429,8 +419,9 @@
       fitFrame();
     }
 
-    /* Schalen voor 1080p */
-    const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 18;
+    /* Schalen: bijna schermvullend */
+    const FRAME_W = 1920, FRAME_H = 1080, SAFE_MARGIN_PX = 4;
+
     function fitFrame(){
       const shell = document.getElementById('dashboard-shell');
       const frame = document.getElementById('zd-frame');
@@ -443,13 +434,12 @@
         (viewH - SAFE_MARGIN_PX) / FRAME_H
       );
 
-      const EXTRA_SHRINK = 0.96;
+      const EXTRA_SHRINK = 0.99; // bijna volledig scherm
       const scale = base * EXTRA_SHRINK;
 
       frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
 
-    /* Fullscreen met 'F' */
     async function toggleFS(){
       try{
         if(document.fullscreenElement){
