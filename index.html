@@ -231,7 +231,7 @@
     .zd-actions{
       display:flex;
       flex-direction:column;
-      gap:14px;
+      gap:12px;
       min-height:0;
       overflow:auto;
       justify-content:center;
@@ -250,10 +250,10 @@
     .zd-action{
       display:flex;
       align-items:center;
-      gap:18px;
-      min-height:92px;
-      padding:20px 22px;
-      border-radius:22px;
+      gap:16px;
+      min-height:74px;
+      padding:14px 18px;
+      border-radius:18px;
       background:#070707;
       border:1px solid rgba(200,164,91,.35);
     }
@@ -271,15 +271,15 @@
     }
 
     .zd-action-text{
-      font-size:40px;
-      line-height:1.08;
+      font-size:32px;
+      line-height:1.12;
       font-weight:900;
       color:#fff;
-      letter-spacing:-0.02em;
+      letter-spacing:-0.01em;
     }
 
     .zd-empty{
-      font-size:34px;
+      font-size:30px;
       font-weight:700;
       color:#9a9a9a;
       padding:8px 4px;
@@ -451,22 +451,19 @@
     const normalizeText = (str)=>String(str || "").toLowerCase().replace(/\s+/g," ").trim();
 
     function displayChecklistName(name){
+      const original = String(name || "").trim();
       const n = normalizeText(name);
 
+      // Alleen bediening normaliseren
       if (n.includes("open")) return "Openen";
       if (n.includes("bediening onder")) return "Bediening onder";
       if (n.includes("bediening boven")) return "Bediening boven";
       if (n === "beneden" || n.includes("sluitlijst beneden")) return "Bediening onder";
       if (n === "boven" || n.includes("sluitlijst boven")) return "Bediening boven";
       if (n.includes("run")) return "Run";
-      if (n.includes("sluitlijst keuken")) return "Sluitlijst keuken";
-      if (n.includes("sluitlijst spoel")) return "Sluitlijst spoel";
-      if (n.includes("spoel")) return "Spoelkeuken";
-      if (n.includes("keuken")) return "Keuken";
-      if (n.includes("bar beneden")) return "Bar beneden";
-      if (n.includes("bar boven")) return "Bar boven";
 
-      return name;
+      // Keukennamen exact behouden
+      return original;
     }
 
     function classifyChecklist(name){
@@ -475,6 +472,8 @@
       if (
         n.includes("keuken") ||
         n.includes("spoel") ||
+        n.includes("koude kant") ||
+        n.includes("warme kant") ||
         n.includes("bar beneden") ||
         n.includes("bar boven") ||
         n.includes("sluitlijst keuken") ||
