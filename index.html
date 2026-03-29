@@ -6,7 +6,7 @@
   <title>Zusje Roermond Dashboard</title>
   <style>
     :root{
-      --bg:#000000;
+      --bg:#0b0b0b;
       --panel:#090909;
       --panel2:#050505;
       --gold:#c8a45b;
@@ -19,7 +19,7 @@
     html, body {
       height:100%;
       margin:0;
-      background:#000;
+      background:var(--bg);
       overflow:hidden;
       color:#fff;
       font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
@@ -57,7 +57,7 @@
       width:100%;
       height:100%;
       padding:22px 30px 26px;
-      background:#000;
+      background:var(--bg);
       display:flex;
       flex-direction:column;
       gap:20px;
@@ -65,12 +65,8 @@
 
     .zd-top{
       position:relative;
-      display:grid;
-      grid-template-columns: 1fr auto auto;
-      align-items:center;
-      column-gap:42px;
-      min-height:150px;
-      padding:18px 30px;
+      min-height:170px;
+      padding:18px 34px;
       border:2px solid var(--gold);
       border-radius:24px;
       overflow:hidden;
@@ -92,33 +88,43 @@
     }
 
     .zd-top-left,
-    .zd-clock-wrap,
+    .zd-clock-center,
     .zd-date-right{
-      position:relative;
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
       z-index:1;
+      display:flex;
+      align-items:center;
     }
 
     .zd-top-left{
-      justify-self:start;
-      align-self:center;
-      display:flex;
-      align-items:center;
-      min-width:0;
+      left:34px;
+      max-width:36%;
+    }
+
+    .zd-clock-center{
+      left:50%;
+      transform:translate(-50%, -50%);
+      justify-content:center;
+      text-align:center;
+      width:max-content;
+    }
+
+    .zd-date-right{
+      right:34px;
+      justify-content:flex-end;
+      text-align:right;
+      width:max-content;
     }
 
     .zd-logo{
       display:block;
-      height:86px;
+      height:140px;
       width:auto;
-      max-width:320px;
+      max-width:520px;
       object-fit:contain;
       filter: drop-shadow(0 3px 14px rgba(0,0,0,.45));
-    }
-
-    .zd-clock-wrap{
-      justify-self:center;
-      text-align:center;
-      transform:translateY(-2px);
     }
 
     .zd-clock{
@@ -129,18 +135,17 @@
       font-variant-numeric:tabular-nums;
       color:#fff;
       text-shadow:0 4px 18px rgba(0,0,0,.55);
+      white-space:nowrap;
     }
 
-    .zd-date-right{
-      justify-self:end;
-      align-self:center;
-      font-size:60px;
-      line-height:1;
+    .zd-date-value{
+      font-size:108px;
+      line-height:.88;
       font-weight:900;
-      letter-spacing:.02em;
+      letter-spacing:-0.04em;
       font-variant-numeric:tabular-nums;
       color:var(--gold);
-      text-shadow:0 3px 14px rgba(0,0,0,.55);
+      text-shadow:0 4px 18px rgba(0,0,0,.55);
       white-space:nowrap;
     }
 
@@ -335,11 +340,13 @@
               <img src="logo.png" alt="'t Zusje Roermond" class="zd-logo">
             </div>
 
-            <div class="zd-clock-wrap">
+            <div class="zd-clock-center">
               <div class="zd-clock" id="zd-clock">--:--</div>
             </div>
 
-            <div class="zd-date-right" id="zd-date">-- --</div>
+            <div class="zd-date-right">
+              <div class="zd-date-value" id="zd-date">-- --</div>
+            </div>
           </div>
 
           <div class="zd-main">
