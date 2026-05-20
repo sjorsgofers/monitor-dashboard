@@ -454,80 +454,211 @@
     .zd-name.ok { color:var(--green); text-shadow:0 0 1.125rem rgba(61,220,132,.18); }
     .zd-name.bad{ color:var(--red);   text-shadow:0 0 1.125rem rgba(255,77,79,.18); }
 
-    /* ===== Actions ===== */
+    /* ===== Actions (flashy) ===== */
     .zd-actions{
       display:flex;
       flex-direction:column;
-      gap:0.75rem;
+      gap:0.875rem;
       min-height:0;
       overflow:auto;
+      padding:0.125rem;
     }
 
+    /* Pulserende gouden aura rond de middencards */
     .zd-center-flex{
       flex:0 1 auto;
+      animation: card-aura 4.5s ease-in-out infinite;
+    }
+
+    @keyframes card-aura{
+      0%, 100%{
+        box-shadow:
+          0 1.25rem 3.125rem rgba(0,0,0,.55),
+          0 0 2.5rem rgba(200,164,91,.18),
+          inset 0 1px 0 rgba(255,255,255,.04);
+      }
+      50%{
+        box-shadow:
+          0 1.25rem 3.125rem rgba(0,0,0,.55),
+          0 0 4rem rgba(200,164,91,.42),
+          inset 0 1px 0 rgba(255,255,255,.06);
+      }
+    }
+
+    /* Prominentere titels voor de flitsende kaarten */
+    .zd-center-flex > .zd-card-title{
+      font-size:2rem;
+      color:#fff3d6;
+      text-shadow:0 0 1.25rem rgba(200,164,91,.45);
+    }
+    .zd-center-flex > .zd-card-title .zd-card-icon{
+      width:2.5rem;
+      height:2.5rem;
+      background:linear-gradient(135deg, rgba(200,164,91,.55), rgba(200,164,91,.12));
+      border:1px solid rgba(200,164,91,.65);
+      box-shadow:0 0 1.25rem rgba(200,164,91,.45), inset 0 0 0.5rem rgba(255,243,214,.2);
+      color:#fff3d6;
+    }
+    .zd-center-flex > .zd-card-title .zd-card-icon svg{
+      width:1.375rem;
+      height:1.375rem;
     }
 
     .zd-action{
       position:relative;
       display:flex;
       align-items:center;
-      gap:1.125rem;
-      min-height:4.625rem;
-      padding:0.875rem 1.375rem 0.875rem 1.25rem;
-      border-radius:1.125rem;
-      background:linear-gradient(135deg, rgba(200,164,91,.10), rgba(255,255,255,.01));
-      border:1px solid var(--glass-border);
+      gap:1.25rem;
+      min-height:5.25rem;
+      padding:1rem 1.5rem 1rem 1.75rem;
+      border-radius:1.25rem;
+      background:linear-gradient(120deg,
+        rgba(200,164,91,.22) 0%,
+        rgba(200,164,91,.05) 35%,
+        rgba(200,164,91,.05) 65%,
+        rgba(200,164,91,.20) 100%);
+      background-size:220% 100%;
+      border:1px solid rgba(200,164,91,.55);
       overflow:hidden;
-      animation:fade-up .5s ease-out both;
+      animation:fade-up .5s ease-out both, gold-flow 9s ease-in-out infinite;
+      box-shadow:
+        0 0.5rem 1.5rem rgba(0,0,0,.35),
+        0 0 1.5rem rgba(200,164,91,.10),
+        inset 0 0 1rem rgba(200,164,91,.06);
     }
 
+    @keyframes gold-flow{
+      0%, 100%{ background-position: 0% 50%; }
+      50%    { background-position: 100% 50%; }
+    }
+
+    /* Gouden accentstreep links met shimmer */
     .zd-action::before{
       content:"";
       position:absolute;
       left:0; top:0; bottom:0;
-      width:0.25rem;
-      background:linear-gradient(180deg, var(--gold-bright), var(--gold-deep));
-      box-shadow:0 0 1rem rgba(200,164,91,.35);
+      width:0.4rem;
+      background:linear-gradient(180deg, transparent 0%, var(--gold-bright) 18%, var(--gold) 50%, var(--gold-bright) 82%, transparent 100%);
+      background-size:100% 220%;
+      animation:accent-shine 3.5s ease-in-out infinite;
+      box-shadow:0 0 1.5rem var(--gold), 0 0 0.5rem var(--gold-bright);
+    }
+
+    @keyframes accent-shine{
+      0%, 100%{ background-position: 0% 100%; }
+      50%    { background-position: 0% 0%; }
+    }
+
+    /* Lichtveeg over elk item */
+    .zd-action::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(115deg, transparent 35%, rgba(255,243,214,.10) 50%, transparent 65%);
+      transform:translateX(-110%);
+      animation:shine-sweep 7s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    @keyframes shine-sweep{
+      0%, 70%{ transform: translateX(-110%); }
+      100%   { transform: translateX(110%); }
     }
 
     .zd-action.pending{
       background:linear-gradient(135deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+      background-size:100% 100%;
       border-color:rgba(140,140,140,.25);
+      animation:fade-up .5s ease-out both;
+      box-shadow:none;
     }
     .zd-action.pending::before{
       background:#5a5a5a;
       box-shadow:none;
+      animation:none;
+    }
+    .zd-action.pending::after{ display:none; }
+
+    /* Stralende gouden orb i.p.v. een puntje */
+    .zd-action .zd-dot{
+      position:relative;
+      width:2.5rem;
+      height:2.5rem;
+      border-radius:50%;
+      background:radial-gradient(circle at 32% 28%,
+        #fff3d6 0%,
+        var(--gold-bright) 28%,
+        var(--gold) 60%,
+        var(--gold-deep) 100%);
+      flex:0 0 auto;
+      box-shadow:
+        0 0 1.25rem rgba(200,164,91,.75),
+        0 0 2.75rem rgba(200,164,91,.35),
+        inset 0 -0.25rem 0.5rem rgba(0,0,0,.22),
+        inset 0 0.25rem 0.5rem rgba(255,243,214,.55);
+      animation:badge-pulse 2.8s ease-in-out infinite;
+    }
+    .zd-action .zd-dot::after{
+      content:"";
+      position:absolute;
+      top:14%; left:18%;
+      width:32%; height:28%;
+      background:radial-gradient(ellipse, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 70%);
+      border-radius:50%;
+      pointer-events:none;
     }
 
-    .zd-action .zd-dot{
-      width:0.875rem;
-      height:0.875rem;
-      border-radius:50%;
-      background:radial-gradient(circle, var(--gold-bright) 0%, var(--gold) 60%, var(--gold-deep) 100%);
-      flex:0 0 auto;
-      box-shadow:0 0 1rem rgba(200,164,91,.55);
+    @keyframes badge-pulse{
+      0%, 100%{
+        box-shadow:
+          0 0 1.25rem rgba(200,164,91,.75),
+          0 0 2.75rem rgba(200,164,91,.35),
+          inset 0 -0.25rem 0.5rem rgba(0,0,0,.22),
+          inset 0 0.25rem 0.5rem rgba(255,243,214,.55);
+      }
+      50%{
+        box-shadow:
+          0 0 2rem rgba(200,164,91,.95),
+          0 0 4rem rgba(200,164,91,.55),
+          inset 0 -0.25rem 0.5rem rgba(0,0,0,.25),
+          inset 0 0.25rem 0.6rem rgba(255,243,214,.75);
+      }
     }
+
     .zd-action.pending .zd-dot{
-      background:#7a7a7a;
+      background:radial-gradient(circle at 32% 28%, #aaa 0%, #7a7a7a 60%, #4a4a4a 100%);
       box-shadow:none;
+      animation:none;
     }
+    .zd-action.pending .zd-dot::after{ display:none; }
 
     .zd-action-text{
-      font-size:2rem;
-      line-height:1.12;
+      position:relative;
+      z-index:1;
+      font-size:2.125rem;
+      line-height:1.1;
       font-weight:900;
       color:#fff;
-      letter-spacing:-0.005em;
-      text-shadow:0 0.125rem 0.875rem rgba(0,0,0,.5);
+      letter-spacing:-0.01em;
+      text-shadow:
+        0 0.125rem 0.875rem rgba(0,0,0,.55),
+        0 0 1.5rem rgba(255,243,214,.20);
     }
 
     .zd-action-text .late{
       color:var(--red);
-      text-shadow:0 0 1rem rgba(255,77,79,.4);
+      text-shadow:0 0 1.25rem rgba(255,77,79,.55);
+      animation:late-pulse 1.4s ease-in-out infinite;
     }
+
+    @keyframes late-pulse{
+      0%, 100%{ opacity:1;  text-shadow:0 0 1.25rem rgba(255,77,79,.55); }
+      50%    { opacity:.85; text-shadow:0 0 2rem    rgba(255,77,79,.90); }
+    }
+
     .zd-action-text .soon{
       color:var(--gold-bright);
-      text-shadow:0 0 1rem rgba(200,164,91,.4);
+      text-shadow:0 0 1.25rem rgba(200,164,91,.55);
     }
 
     .zd-empty{
