@@ -879,11 +879,32 @@
       renderAll();
     }
 
+    let _clockEls = null;
+    function ensureClockEls(){
+      if (_clockEls) return _clockEls;
+      const root = $("#zd-clock");
+      root.innerHTML = '<span class="hh">--</span><span class="colon">:</span><span class="mm">--</span><span class="colon">:</span><span class="ss">--</span>';
+      _clockEls = {
+        hh: root.querySelector('.hh'),
+        mm: root.querySelector('.mm'),
+        ss: root.querySelector('.ss')
+      };
+      return _clockEls;
+    }
+
     function renderHeader(){
       const n = new Date();
       const ops = getOpsDate(n);
-      $("#zd-clock").innerHTML = `${pad(n.getHours())}<span class="colon">:</span>${pad(n.getMinutes())}<span class="colon">:</span>${pad(n.getSeconds())}`;
-      $("#zd-date").textContent = fmtShortDate(ops);
+      const els = ensureClockEls();
+      const hh = pad(n.getHours()), mm = pad(n.getMinutes()), ss = pad(n.getSeconds());
+      // Alleen textContent updaten wanneer veranderd — geen DOM rebuild elke seconde
+      if (els.hh.textContent !== hh) els.hh.textContent = hh;
+      if (els.mm.textContent !== mm) els.mm.textContent = mm;
+      if (els.ss.textContent !== ss) els.ss.textContent = ss;
+
+      const dateStr = fmtShortDate(ops);
+      const dateEl = $("#zd-date");
+      if (dateEl.textContent !== dateStr) dateEl.textContent = dateStr;
     }
 
     function renderChecklistGroup(targetId, items){
@@ -920,6 +941,8 @@
       });
     }
 
+    let _lastServiceKey = null;
+    let _lastKitchenKey = null;
     function renderChecklists(){
       const service = [];
       const kitchen = [];
@@ -936,8 +959,17 @@
         return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
       });
 
-      renderChecklistGroup("zd-serviceChecklists", service);
-      renderChecklistGroup("zd-kitchenChecklists", kitchen);
+      // Alleen DOM herbouwen als de data veranderd is
+      const sKey = JSON.stringify(service);
+      if (sKey !== _lastServiceKey) {
+        _lastServiceKey = sKey;
+        renderChecklistGroup("zd-serviceChecklists", service);
+      }
+      const kKey = JSON.stringify(kitchen);
+      if (kKey !== _lastKitchenKey) {
+        _lastKitchenKey = kKey;
+        renderChecklistGroup("zd-kitchenChecklists", kitchen);
+      }
     }
 
     function isYellowCratesDay(ops){
@@ -1018,11 +1050,16 @@
       return actions;
     }
 
+    let _lastActionsKey = null;
     function renderMainActions(){
       const wrap = $("#zd-actionsList");
-      wrap.innerHTML = "";
-
       const actions = buildMainActions();
+
+      const key = JSON.stringify(actions);
+      if (key === _lastActionsKey) return;
+      _lastActionsKey = key;
+
+      wrap.innerHTML = "";
 
       if(!actions.length){
         wrap.innerHTML = `<div class="zd-empty">Geen acties voor vandaag</div>`;
@@ -1040,10 +1077,16 @@
       });
     }
 
+    let _lastPeriodicKey = null;
     function renderPeriodic(){
       const list = $("#zd-periodicList");
-      list.innerHTML = "";
       const t = state.periodicTasks || [];
+
+      const key = JSON.stringify(t);
+      if (key === _lastPeriodicKey) return;
+      _lastPeriodicKey = key;
+
+      list.innerHTML = "";
 
       if(!t.length){
         list.innerHTML = `<div class="zd-empty">Geen dagnotities of extra taken</div>`;
