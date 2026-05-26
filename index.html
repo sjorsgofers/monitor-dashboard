@@ -70,23 +70,12 @@
       top:-12.5rem;
       left:-12.5rem;
       background:radial-gradient(circle, rgba(200,164,91,.55), transparent 60%);
-      animation:orb-a 22s ease-in-out infinite;
     }
 
     #dashboard-shell::after{
       bottom:-18.75rem;
       right:-12.5rem;
       background:radial-gradient(circle, rgba(200,164,91,.40), transparent 60%);
-      animation:orb-b 28s ease-in-out infinite;
-    }
-
-    @keyframes orb-a{
-      0%,100%{ transform:translate(0,0) scale(1); }
-      50%   { transform:translate(11.25rem,7.5rem) scale(1.15); }
-    }
-    @keyframes orb-b{
-      0%,100%{ transform:translate(0,0) scale(1); }
-      50%   { transform:translate(-13.75rem,-8.75rem) scale(1.1); }
     }
 
     /* Subtle grain overlay */
@@ -152,13 +141,6 @@
       -webkit-mask-composite:xor;
               mask-composite:exclude;
       pointer-events:none;
-      background-size:200% 200%;
-      animation:gold-shift 14s ease-in-out infinite;
-    }
-
-    @keyframes gold-shift{
-      0%,100%{ background-position:0% 50%; }
-      50%   { background-position:100% 50%; }
     }
 
     .zd-top::after{
@@ -223,13 +205,7 @@
 
     .zd-clock .colon{
       display:inline-block;
-      animation:blink 1s steps(2,end) infinite;
       color:var(--gold-bright);
-    }
-
-    @keyframes blink{
-      0%,50%{ opacity:1; }
-      51%,100%{ opacity:.25; }
     }
 
     .zd-clock-label,
@@ -280,8 +256,6 @@
       flex-direction:column;
       border-radius:1.75rem;
       background:linear-gradient(180deg, var(--panel), var(--panel-2));
-      backdrop-filter:blur(0.875rem) saturate(115%);
-      -webkit-backdrop-filter:blur(0.875rem) saturate(115%);
       box-shadow:
         0 1.25rem 3.125rem rgba(0,0,0,.55),
         inset 0 1px 0 rgba(255,255,255,.04);
@@ -382,7 +356,6 @@
       background:linear-gradient(135deg, rgba(255,255,255,.025), rgba(255,255,255,0));
       border:1px solid var(--glass-border-soft);
       overflow:hidden;
-      animation:fade-up .5s ease-out both;
     }
 
     .zd-check-item::before{
@@ -421,28 +394,14 @@
       background:radial-gradient(circle at 30% 30%, rgba(61,220,132,.35), rgba(61,220,132,.05) 70%);
       border:0.125rem solid var(--green);
       color:var(--green);
-      box-shadow:0 0 1.5rem rgba(61,220,132,.35), inset 0 0 0.75rem rgba(61,220,132,.2);
-      animation:pulse-green 2.4s ease-out infinite;
+      box-shadow:0 0 1.5rem rgba(61,220,132,.45), inset 0 0 0.75rem rgba(61,220,132,.25);
     }
 
     .is-bad .zd-status-icon{
       background:radial-gradient(circle at 30% 30%, rgba(255,77,79,.35), rgba(255,77,79,.05) 70%);
       border:0.125rem solid var(--red);
       color:var(--red);
-      box-shadow:0 0 1.5rem rgba(255,77,79,.35), inset 0 0 0.75rem rgba(255,77,79,.2);
-      animation:pulse-red 2.0s ease-out infinite;
-    }
-
-    @keyframes pulse-green{
-      0%   { box-shadow:0 0 0 0 rgba(61,220,132,.45), inset 0 0 0.75rem rgba(61,220,132,.2); }
-      80%  { box-shadow:0 0 0 0.875rem rgba(61,220,132,0), inset 0 0 0.75rem rgba(61,220,132,.2); }
-      100% { box-shadow:0 0 0 0 rgba(61,220,132,0), inset 0 0 0.75rem rgba(61,220,132,.2); }
-    }
-
-    @keyframes pulse-red{
-      0%   { box-shadow:0 0 0 0 rgba(255,77,79,.55), inset 0 0 0.75rem rgba(255,77,79,.2); }
-      80%  { box-shadow:0 0 0 0.875rem rgba(255,77,79,0), inset 0 0 0.75rem rgba(255,77,79,.2); }
-      100% { box-shadow:0 0 0 0 rgba(255,77,79,0), inset 0 0 0.75rem rgba(255,77,79,.2); }
+      box-shadow:0 0 1.5rem rgba(255,77,79,.45), inset 0 0 0.75rem rgba(255,77,79,.25);
     }
 
     .zd-name{
@@ -464,25 +423,13 @@
       padding:0.125rem;
     }
 
-    /* Pulserende gouden aura rond de middencards */
+    /* Statische gouden aura rond de middencards */
     .zd-center-flex{
       flex:0 1 auto;
-      animation: card-aura 4.5s ease-in-out infinite;
-    }
-
-    @keyframes card-aura{
-      0%, 100%{
-        box-shadow:
-          0 1.25rem 3.125rem rgba(0,0,0,.55),
-          0 0 2.5rem rgba(200,164,91,.18),
-          inset 0 1px 0 rgba(255,255,255,.04);
-      }
-      50%{
-        box-shadow:
-          0 1.25rem 3.125rem rgba(0,0,0,.55),
-          0 0 4rem rgba(200,164,91,.42),
-          inset 0 1px 0 rgba(255,255,255,.06);
-      }
+      box-shadow:
+        0 1.25rem 3.125rem rgba(0,0,0,.55),
+        0 0 3.25rem rgba(200,164,91,.32),
+        inset 0 1px 0 rgba(255,255,255,.05);
     }
 
     /* Prominentere titels voor de flitsende kaarten */
@@ -514,70 +461,35 @@
       border-radius:1.25rem;
       background:linear-gradient(120deg,
         rgba(200,164,91,.22) 0%,
-        rgba(200,164,91,.05) 35%,
-        rgba(200,164,91,.05) 65%,
+        rgba(200,164,91,.08) 50%,
         rgba(200,164,91,.20) 100%);
-      background-size:220% 100%;
       border:1px solid rgba(200,164,91,.55);
       overflow:hidden;
-      animation:fade-up .5s ease-out both, gold-flow 9s ease-in-out infinite;
       box-shadow:
         0 0.5rem 1.5rem rgba(0,0,0,.35),
-        0 0 1.5rem rgba(200,164,91,.10),
+        0 0 1.5rem rgba(200,164,91,.12),
         inset 0 0 1rem rgba(200,164,91,.06);
     }
 
-    @keyframes gold-flow{
-      0%, 100%{ background-position: 0% 50%; }
-      50%    { background-position: 100% 50%; }
-    }
-
-    /* Gouden accentstreep links met shimmer */
+    /* Gouden accentstreep links */
     .zd-action::before{
       content:"";
       position:absolute;
       left:0; top:0; bottom:0;
       width:0.4rem;
-      background:linear-gradient(180deg, transparent 0%, var(--gold-bright) 18%, var(--gold) 50%, var(--gold-bright) 82%, transparent 100%);
-      background-size:100% 220%;
-      animation:accent-shine 3.5s ease-in-out infinite;
+      background:linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, var(--gold-bright) 100%);
       box-shadow:0 0 1.5rem var(--gold), 0 0 0.5rem var(--gold-bright);
-    }
-
-    @keyframes accent-shine{
-      0%, 100%{ background-position: 0% 100%; }
-      50%    { background-position: 0% 0%; }
-    }
-
-    /* Lichtveeg over elk item */
-    .zd-action::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(115deg, transparent 35%, rgba(255,243,214,.10) 50%, transparent 65%);
-      transform:translateX(-110%);
-      animation:shine-sweep 7s ease-in-out infinite;
-      pointer-events:none;
-    }
-
-    @keyframes shine-sweep{
-      0%, 70%{ transform: translateX(-110%); }
-      100%   { transform: translateX(110%); }
     }
 
     .zd-action.pending{
       background:linear-gradient(135deg, rgba(255,255,255,.025), rgba(255,255,255,0));
-      background-size:100% 100%;
       border-color:rgba(140,140,140,.25);
-      animation:fade-up .5s ease-out both;
       box-shadow:none;
     }
     .zd-action.pending::before{
       background:#5a5a5a;
       box-shadow:none;
-      animation:none;
     }
-    .zd-action.pending::after{ display:none; }
 
     /* Stralende gouden orb i.p.v. een puntje */
     .zd-action .zd-dot{
@@ -592,11 +504,10 @@
         var(--gold-deep) 100%);
       flex:0 0 auto;
       box-shadow:
-        0 0 1.25rem rgba(200,164,91,.75),
-        0 0 2.75rem rgba(200,164,91,.35),
+        0 0 1.75rem rgba(200,164,91,.85),
+        0 0 3.25rem rgba(200,164,91,.45),
         inset 0 -0.25rem 0.5rem rgba(0,0,0,.22),
-        inset 0 0.25rem 0.5rem rgba(255,243,214,.55);
-      animation:badge-pulse 2.8s ease-in-out infinite;
+        inset 0 0.25rem 0.55rem rgba(255,243,214,.65);
     }
     .zd-action .zd-dot::after{
       content:"";
@@ -608,27 +519,9 @@
       pointer-events:none;
     }
 
-    @keyframes badge-pulse{
-      0%, 100%{
-        box-shadow:
-          0 0 1.25rem rgba(200,164,91,.75),
-          0 0 2.75rem rgba(200,164,91,.35),
-          inset 0 -0.25rem 0.5rem rgba(0,0,0,.22),
-          inset 0 0.25rem 0.5rem rgba(255,243,214,.55);
-      }
-      50%{
-        box-shadow:
-          0 0 2rem rgba(200,164,91,.95),
-          0 0 4rem rgba(200,164,91,.55),
-          inset 0 -0.25rem 0.5rem rgba(0,0,0,.25),
-          inset 0 0.25rem 0.6rem rgba(255,243,214,.75);
-      }
-    }
-
     .zd-action.pending .zd-dot{
       background:radial-gradient(circle at 32% 28%, #aaa 0%, #7a7a7a 60%, #4a4a4a 100%);
       box-shadow:none;
-      animation:none;
     }
     .zd-action.pending .zd-dot::after{ display:none; }
 
@@ -647,13 +540,7 @@
 
     .zd-action-text .late{
       color:var(--red);
-      text-shadow:0 0 1.25rem rgba(255,77,79,.55);
-      animation:late-pulse 1.4s ease-in-out infinite;
-    }
-
-    @keyframes late-pulse{
-      0%, 100%{ opacity:1;  text-shadow:0 0 1.25rem rgba(255,77,79,.55); }
-      50%    { opacity:.85; text-shadow:0 0 2rem    rgba(255,77,79,.90); }
+      text-shadow:0 0 1.5rem rgba(255,77,79,.75);
     }
 
     .zd-action-text .soon{
@@ -697,28 +584,6 @@
       letter-spacing:0;
     }
 
-    /* ===== Animations ===== */
-    @keyframes fade-up{
-      from{ opacity:0; transform:translateY(0.625rem); }
-      to  { opacity:1; transform:translateY(0); }
-    }
-
-    .zd-list > *:nth-child(1),
-    .zd-actions > *:nth-child(1){ animation-delay:.04s; }
-    .zd-list > *:nth-child(2),
-    .zd-actions > *:nth-child(2){ animation-delay:.10s; }
-    .zd-list > *:nth-child(3),
-    .zd-actions > *:nth-child(3){ animation-delay:.16s; }
-    .zd-list > *:nth-child(4),
-    .zd-actions > *:nth-child(4){ animation-delay:.22s; }
-    .zd-list > *:nth-child(5),
-    .zd-actions > *:nth-child(5){ animation-delay:.28s; }
-    .zd-list > *:nth-child(6),
-    .zd-actions > *:nth-child(6){ animation-delay:.34s; }
-    .zd-list > *:nth-child(7),
-    .zd-actions > *:nth-child(7){ animation-delay:.40s; }
-    .zd-list > *:nth-child(n+8),
-    .zd-actions > *:nth-child(n+8){ animation-delay:.46s; }
   </style>
 </head>
 <body>
