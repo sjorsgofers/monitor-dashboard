@@ -825,33 +825,43 @@
       }
     }
 
+    // Dagnotities & extra taken komen uit Supabase (beheerd in de Zusje-app,
+    // tabblad "Taken & agenda"). Herhalende punten worden hier uitgevouwen naar vandaag.
+    const AGENDA_SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
+    const AGENDA_SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
+
+    function agendaOccursOnToday(it, t){
+      const parts = (it.start_date||"").split("-").map(Number);
+      if(parts.length < 3 || !parts[0]) return false;
+      const start = new Date(parts[0], parts[1]-1, parts[2]);
+      if(t < start) return false;
+      if(it.until_date){ const u=it.until_date.split("-").map(Number); const ud=new Date(u[0],u[1]-1,u[2]); if(t>ud) return false; }
+      switch(it.recurrence){
+        case "daily": return true;
+        case "weekly": { const wd=(it.weekdays&&it.weekdays.length)?it.weekdays:[start.getDay()]; return wd.includes(t.getDay()); }
+        case "monthly": return t.getDate()===start.getDate();
+        case "yearly": return t.getDate()===start.getDate() && t.getMonth()===start.getMonth();
+        default: return t.getTime()===start.getTime();
+      }
+    }
+
     async function fetchPeriodic(){
-      const u = CONFIG.sheets.periodicJson;
-      if(!u) return;
       try{
-        const sep = u.includes("?") ? "&" : "?";
-        const r = await fetch(u + sep + "tz=Europe/Amsterdam",{cache:"no-store"});
-        if(r.ok){
-          const j = await r.json();
-          let items = (j && j.ok && Array.isArray(j.items)) ? j.items : [];
-          const todayStr = opsDateStrToday();
-
-          items = items.filter(ev=>{
-            const s = ev.start || ev.startTime || ev.date || ev.dateISO;
-            if(!s) return true;
-            const evStr = ymdInAmsterdam(s);
-            if(!evStr) return false;
-            return evStr === todayStr;
-          });
-
-          state.periodicTasks = items.map(ev=>({
-            title: ev.title,
-            allDay: !!ev.allDay,
-            start: ev.start || ev.startTime || ev.date || ev.dateISO || null
-          }));
-        }
+        const url = AGENDA_SUPABASE_URL + "/rest/v1/agenda_items?select=*";
+        const r = await fetch(url, { headers:{ apikey:AGENDA_SUPABASE_ANON, Authorization:"Bearer "+AGENDA_SUPABASE_ANON }, cache:"no-store" });
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        const rows = await r.json();
+        const todayStr = opsDateStrToday();
+        const p = todayStr.split("-").map(Number);
+        const t = new Date(p[0], p[1]-1, p[2]);
+        const todays = (Array.isArray(rows)?rows:[]).filter(it=>agendaOccursOnToday(it, t));
+        state.periodicTasks = todays.map(it=>({
+          title: (!it.all_day && it.start_time) ? (it.start_time + " · " + it.title) : it.title,
+          allDay: !!it.all_day,
+          start: it.start_date || null
+        }));
       }catch(e){
-        console.warn("Periodic fail",e);
+        console.warn("Periodic (Supabase) fail", e);
       }
     }
 
