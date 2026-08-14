@@ -846,23 +846,46 @@
     }
 
     async function fetchPeriodic(){
+      const todayStr = opsDateStrToday();
+      const p = todayStr.split("-").map(Number);
+      const t = new Date(p[0], p[1]-1, p[2]);
+      let supaItems = [], legacyItems = [];
+      // 1) Supabase — beheerd in de Zusje-app (tabblad Taken & agenda)
       try{
         const url = AGENDA_SUPABASE_URL + "/rest/v1/agenda_items?select=*";
         const r = await fetch(url, { headers:{ apikey:AGENDA_SUPABASE_ANON, Authorization:"Bearer "+AGENDA_SUPABASE_ANON }, cache:"no-store" });
-        if(!r.ok) throw new Error("HTTP "+r.status);
-        const rows = await r.json();
-        const todayStr = opsDateStrToday();
-        const p = todayStr.split("-").map(Number);
-        const t = new Date(p[0], p[1]-1, p[2]);
-        const todays = (Array.isArray(rows)?rows:[]).filter(it=>agendaOccursOnToday(it, t));
-        state.periodicTasks = todays.map(it=>({
-          title: (!it.all_day && it.start_time) ? (it.start_time + " · " + it.title) : it.title,
-          allDay: !!it.all_day,
-          start: it.start_date || null
-        }));
-      }catch(e){
-        console.warn("Periodic (Supabase) fail", e);
-      }
+        if(r.ok){
+          const rows = await r.json();
+          supaItems = (Array.isArray(rows)?rows:[]).filter(it=>agendaOccursOnToday(it, t)).map(it=>
+            (!it.all_day && it.start_time) ? (it.start_time + " · " + it.title) : it.title
+          );
+        }
+      }catch(e){ console.warn("Periodic (Supabase) fail", e); }
+      // 2) Bestaande Google Agenda (via Apps Script) — zodat oude punten blijven tonen tot je ze overzet
+      try{
+        const u = CONFIG.sheets.periodicJson;
+        if(u){
+          const sep = u.includes("?") ? "&" : "?";
+          const r = await fetch(u + sep + "tz=Europe/Amsterdam",{cache:"no-store"});
+          if(r.ok){
+            const j = await r.json();
+            const list = (j && j.ok && Array.isArray(j.items)) ? j.items : [];
+            legacyItems = list.filter(ev=>{
+              const s = ev.start || ev.startTime || ev.date || ev.dateISO;
+              if(!s) return true;
+              return ymdInAmsterdam(s) === todayStr;
+            }).map(ev=>ev.title);
+          }
+        }
+      }catch(e){ console.warn("Periodic (legacy) fail", e); }
+      // Samenvoegen + ontdubbelen op titel
+      const seen = new Set(), merged = [];
+      [...supaItems, ...legacyItems].forEach(title=>{
+        const k = (title||"").trim().toLowerCase();
+        if(!k || seen.has(k)) return;
+        seen.add(k); merged.push({ title, allDay:true, start:todayStr });
+      });
+      state.periodicTasks = merged;
     }
 
     async function fetchContainers(){
