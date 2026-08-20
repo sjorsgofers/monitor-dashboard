@@ -237,7 +237,7 @@
       flex:1;
       min-height:0;
       display:grid;
-      grid-template-columns: minmax(18rem, 26.25rem) 1fr minmax(18rem, 26.25rem);
+      grid-template-columns: minmax(16rem, 21.5rem) 1fr;
       gap:1.375rem;
     }
 
@@ -289,6 +289,32 @@
     .zd-side{ padding:1.5rem 1.25rem 1.25rem; }
     .zd-center{ padding:1.375rem; }
 
+    /* ===== Compacte checklist-kolom (Bediening + Keuken samen) ===== */
+    .zd-checkcard{ padding:1.25rem 1rem 1rem; }
+    .zd-checkcard .zd-card-title{ font-size:1.5rem; margin-bottom:0.75rem; }
+    .zd-checkcard .zd-card-icon{ width:1.75rem; height:1.75rem; }
+    .zd-checkcard .zd-card-icon svg{ width:0.95rem; height:0.95rem; }
+    .zd-sub{
+      font-size:1.05rem;
+      font-weight:800;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      color:var(--gold-bright);
+      opacity:.85;
+      margin:0.875rem 0 0.5rem;
+    }
+    .zd-sub:first-of-type{ margin-top:0.125rem; }
+    .zd-list-compact{ gap:0.5rem; overflow:hidden; flex:0 1 auto; }
+    .zd-list-compact .zd-check-item{
+      min-height:3.125rem;
+      padding:0.5rem 0.75rem;
+      border-radius:0.875rem;
+      gap:0.75rem;
+    }
+    .zd-list-compact .zd-status-icon{ width:1.875rem; height:1.875rem; }
+    .zd-list-compact .zd-status-icon svg{ width:0.95rem; height:0.95rem; }
+    .zd-list-compact .zd-name{ font-size:1.3rem; font-weight:800; }
+
     /* ===== 4 categorie-vakken (2×2) in de middenkolom ===== */
     .zd-catgrid{
       flex:1;
@@ -298,58 +324,58 @@
       grid-template-rows:1fr 1fr;
       gap:1.375rem;
     }
-    .zd-catcard{ padding:1.25rem 1.25rem 1.125rem; }
+    .zd-catcard{ padding:1.375rem 1.5rem 1.25rem; }
     .zd-catcard .zd-card-title{
-      font-size:1.5rem;
-      margin-bottom:0.875rem;
+      font-size:2.05rem;
+      margin-bottom:1rem;
       letter-spacing:.03em;
     }
-    .zd-catcard .zd-card-icon{ width:1.875rem; height:1.875rem; }
-    .zd-catcard .zd-card-icon svg{ width:1rem; height:1rem; }
+    .zd-catcard .zd-card-icon{ width:2.375rem; height:2.375rem; }
+    .zd-catcard .zd-card-icon svg{ width:1.3rem; height:1.3rem; }
 
     .zd-tasks{
       flex:1;
       min-height:0;
       display:flex;
       flex-direction:column;
-      gap:0.625rem;
+      gap:0.8rem;
       overflow:hidden;
     }
     .zd-t{
       display:flex;
       align-items:center;
-      gap:0.875rem;
-      min-height:3.125rem;
-      padding:0.5rem 1rem;
-      border-radius:0.875rem;
+      gap:1.125rem;
+      min-height:4.125rem;
+      padding:0.75rem 1.375rem;
+      border-radius:1.125rem;
       background:linear-gradient(120deg, rgba(200,164,91,.18) 0%, rgba(200,164,91,.05) 100%);
       border:1px solid rgba(200,164,91,.28);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
     }
     .zd-t-dot{
-      width:0.625rem;
-      height:0.625rem;
+      width:0.875rem;
+      height:0.875rem;
       border-radius:50%;
       background:var(--gold-bright);
-      box-shadow:0 0 0.625rem rgba(200,164,91,.85);
+      box-shadow:0 0 0.75rem rgba(200,164,91,.85);
       flex:0 0 auto;
     }
     .zd-t-text{
-      font-size:1.3rem;
-      font-weight:700;
-      line-height:1.22;
+      font-size:1.85rem;
+      font-weight:800;
+      line-height:1.18;
       color:#fff;
       min-width:0;
     }
     .zd-t-time{
       margin-left:auto;
       flex:0 0 auto;
-      font-size:1.05rem;
+      font-size:1.45rem;
       font-weight:800;
       color:var(--gold-bright);
       background:rgba(200,164,91,.14);
       border:1px solid rgba(200,164,91,.4);
-      padding:0.2rem 0.75rem;
+      padding:0.3rem 1rem;
       border-radius:999px;
       white-space:nowrap;
       letter-spacing:.02em;
@@ -357,10 +383,10 @@
     .zd-t-time.soon{ color:#ffb84d; border-color:rgba(255,184,77,.55); background:rgba(255,184,77,.12); }
     .zd-t-time.late{ color:#ff6b6b; border-color:rgba(255,107,107,.55); background:rgba(255,107,107,.12); }
     .zd-cat-empty{
-      font-size:1.125rem;
+      font-size:1.5rem;
       font-weight:600;
       color:rgba(255,255,255,.32);
-      padding:0.25rem 0.125rem;
+      padding:0.375rem 0.25rem;
     }
 
     .zd-card-title{
@@ -695,15 +721,18 @@
           </div>
 
           <div class="zd-main">
-            <div class="zd-col">
-              <section class="zd-card zd-side">
+            <div class="zd-col zd-col-checks">
+              <section class="zd-card zd-side zd-checkcard">
                 <div class="zd-card-title">
                   <span class="zd-card-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                   </span>
-                  Checklists Bediening
+                  Checklists
                 </div>
-                <div class="zd-list" id="zd-serviceChecklists"></div>
+                <div class="zd-sub">Bediening</div>
+                <div class="zd-list zd-list-compact" id="zd-serviceChecklists"></div>
+                <div class="zd-sub">Keuken</div>
+                <div class="zd-list zd-list-compact" id="zd-kitchenChecklists"></div>
               </section>
             </div>
 
@@ -751,17 +780,6 @@
               </div>
             </div>
 
-            <div class="zd-col">
-              <section class="zd-card zd-side">
-                <div class="zd-card-title">
-                  <span class="zd-card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8a4 4 0 008 0V2M10 14v8M4 22h12"/></svg>
-                  </span>
-                  Checklists Keuken
-                </div>
-                <div class="zd-list" id="zd-kitchenChecklists"></div>
-              </section>
-            </div>
           </div>
 
           <div class="zd-footer">
