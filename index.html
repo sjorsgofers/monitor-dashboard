@@ -451,6 +451,17 @@
       height:1.375rem;
     }
 
+    .zd-cat{
+      font-size:1.05rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--gold-bright);
+      margin:1.1rem 0 .55rem;
+      padding-bottom:.4rem;
+      border-bottom:1px solid rgba(200,164,91,.28);
+    }
+    .zd-cat:first-child{ margin-top:.2rem; }
     .zd-action{
       position:relative;
       display:flex;
@@ -845,47 +856,24 @@
       }
     }
 
+    // Alles wordt nu beheerd in de Zusje-app (tabblad Taken & agenda) → alleen Supabase.
+    const AGENDA_CATEGORIES = ["Containers & Bidfood", "Bestellen", "Keuken", "Bediening"];
     async function fetchPeriodic(){
       const todayStr = opsDateStrToday();
       const p = todayStr.split("-").map(Number);
       const t = new Date(p[0], p[1]-1, p[2]);
-      let supaItems = [], legacyItems = [];
-      // 1) Supabase — beheerd in de Zusje-app (tabblad Taken & agenda)
       try{
         const url = AGENDA_SUPABASE_URL + "/rest/v1/agenda_items?select=*";
         const r = await fetch(url, { headers:{ apikey:AGENDA_SUPABASE_ANON, Authorization:"Bearer "+AGENDA_SUPABASE_ANON }, cache:"no-store" });
         if(r.ok){
           const rows = await r.json();
-          supaItems = (Array.isArray(rows)?rows:[]).filter(it=>agendaOccursOnToday(it, t)).map(it=>
-            (!it.all_day && it.start_time) ? (it.start_time + " · " + it.title) : it.title
-          );
+          const todays = (Array.isArray(rows)?rows:[]).filter(it=>agendaOccursOnToday(it, t));
+          state.periodicTasks = todays.map(it=>({
+            title: (!it.all_day && it.start_time) ? (it.start_time + " · " + it.title) : it.title,
+            category: it.category || ""
+          }));
         }
       }catch(e){ console.warn("Periodic (Supabase) fail", e); }
-      // 2) Bestaande Google Agenda (via Apps Script) — zodat oude punten blijven tonen tot je ze overzet
-      try{
-        const u = CONFIG.sheets.periodicJson;
-        if(u){
-          const sep = u.includes("?") ? "&" : "?";
-          const r = await fetch(u + sep + "tz=Europe/Amsterdam",{cache:"no-store"});
-          if(r.ok){
-            const j = await r.json();
-            const list = (j && j.ok && Array.isArray(j.items)) ? j.items : [];
-            legacyItems = list.filter(ev=>{
-              const s = ev.start || ev.startTime || ev.date || ev.dateISO;
-              if(!s) return true;
-              return ymdInAmsterdam(s) === todayStr;
-            }).map(ev=>ev.title);
-          }
-        }
-      }catch(e){ console.warn("Periodic (legacy) fail", e); }
-      // Samenvoegen + ontdubbelen op titel
-      const seen = new Set(), merged = [];
-      [...supaItems, ...legacyItems].forEach(title=>{
-        const k = (title||"").trim().toLowerCase();
-        if(!k || seen.has(k)) return;
-        seen.add(k); merged.push({ title, allDay:true, start:todayStr });
-      });
-      state.periodicTasks = merged;
     }
 
     async function fetchContainers(){
@@ -1126,14 +1114,24 @@
         return;
       }
 
+      const groups = {};
       t.forEach(x=>{
-        const el = document.createElement("div");
-        el.className = "zd-action";
-        el.innerHTML = `
-          <span class="zd-dot"></span>
-          <div class="zd-action-text">${x.title}</div>
-        `;
-        list.appendChild(el);
+        const c = AGENDA_CATEGORIES.includes(x.category) ? x.category : "Overig";
+        (groups[c] = groups[c] || []).push(x);
+      });
+      AGENDA_CATEGORIES.concat(["Overig"]).forEach(cat=>{
+        const items = groups[cat];
+        if(!items || !items.length) return;
+        const head = document.createElement("div");
+        head.className = "zd-cat";
+        head.textContent = cat;
+        list.appendChild(head);
+        items.forEach(x=>{
+          const el = document.createElement("div");
+          el.className = "zd-action";
+          el.innerHTML = `<span class="zd-dot"></span><div class="zd-action-text">${x.title}</div>`;
+          list.appendChild(el);
+        });
       });
     }
 
