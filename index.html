@@ -342,6 +342,8 @@
       overflow:hidden;
     }
     .zd-t{
+      position:relative;
+      isolation:isolate;
       display:flex;
       align-items:center;
       gap:1.125rem;
@@ -352,6 +354,38 @@
       border:1px solid rgba(200,164,91,.28);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
     }
+
+    /* Laatste uur voor de deadline: hele regel knippert oranje.
+       Alleen opacity wordt geanimeerd (GPU-vriendelijk, soepel op oudere pc's). */
+    .zd-t--soon{
+      border-color:rgba(255,184,77,.9);
+      background:linear-gradient(120deg, rgba(255,184,77,.26) 0%, rgba(255,140,0,.08) 100%);
+    }
+    .zd-t--soon::after{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      z-index:-1;
+      border-radius:inherit;
+      background:linear-gradient(120deg, rgba(255,184,77,.55) 0%, rgba(255,140,0,.30) 100%);
+      box-shadow:0 0 1.75rem rgba(255,170,60,.65);
+      opacity:0;
+      animation:zdBlink 1.1s ease-in-out infinite;
+      pointer-events:none;
+    }
+    .zd-t--soon .zd-t-dot{ background:#ffb84d; box-shadow:0 0 0.875rem rgba(255,184,77,.95); }
+    @keyframes zdBlink{
+      0%, 100% { opacity:0; }
+      50%      { opacity:1; }
+    }
+
+    /* Na de deadline: vast rood, duidelijk zichtbaar (geen animatie). */
+    .zd-t--late{
+      border-color:rgba(255,107,107,.85);
+      background:linear-gradient(120deg, rgba(255,107,107,.26) 0%, rgba(255,107,107,.07) 100%);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 0 1.25rem rgba(255,107,107,.30);
+    }
+    .zd-t--late .zd-t-dot{ background:#ff6b6b; box-shadow:0 0 0.875rem rgba(255,107,107,.95); }
     .zd-t-dot{
       width:0.875rem;
       height:0.875rem;
@@ -782,11 +816,6 @@
 
           </div>
 
-          <div class="zd-footer">
-            <span>Druk op</span>
-            <span class="kbd">F</span>
-            <span>voor fullscreen</span>
-          </div>
         </div>
       </div>
     </div>
@@ -1081,18 +1110,18 @@
       "Bediening": "zd-cat-bediening"
     };
 
-    function taskTimeBadge(x, now){
-      // Taak met tijd = deadline: toon "vóór HH:MM", oranje bij <60 min, rood bij te laat.
-      if(x.all_day || !x.start_time) return "";
+    // Taak met tijd = deadline. Status bepaalt badge én opmaak van de hele regel:
+    // <60 min → knipperend oranje (niet te missen), na deadline → vast rood.
+    function taskDeadlineState(x, now){
+      if(x.all_day || !x.start_time) return null;
       const m = /^(\d{1,2}):(\d{2})$/.exec(x.start_time.trim());
-      if(!m) return "";
+      if(!m) return null;
       const limit = new Date(now);
       limit.setHours(Number(m[1]), Number(m[2]), 0, 0);
       const diffMin = Math.round((limit - now) / 60000);
-      let cls = "", label = "vóór " + x.start_time;
-      if(diffMin < 0){ cls = " late"; label = "te laat"; }
-      else if(diffMin <= 60){ cls = " soon"; label = "binnen " + diffMin + " min"; }
-      return `<span class="zd-t-time${cls}">${label}</span>`;
+      if(diffMin < 0)   return { cls:"late", label:"te laat" };
+      if(diffMin <= 60) return { cls:"soon", label:"binnen " + diffMin + " min" };
+      return { cls:"", label:"vóór " + x.start_time };
     }
 
     function renderCategories(){
@@ -1117,13 +1146,18 @@
           const bt = (!b.all_day && b.start_time) ? b.start_time : "99:99";
           return at.localeCompare(bt);
         });
-        wrap.innerHTML = items.map(x=>`
-          <div class="zd-t">
+        wrap.innerHTML = items.map(x=>{
+          const st = taskDeadlineState(x, now);
+          const rowCls = st && st.cls === "soon" ? " zd-t--soon"
+                       : st && st.cls === "late" ? " zd-t--late" : "";
+          const badge = st ? `<span class="zd-t-time ${st.cls}">${st.label}</span>` : "";
+          return `
+          <div class="zd-t${rowCls}">
             <span class="zd-t-dot"></span>
             <div class="zd-t-text">${x.title}</div>
-            ${taskTimeBadge(x, now)}
-          </div>
-        `).join("");
+            ${badge}
+          </div>`;
+        }).join("");
       });
     }
 
