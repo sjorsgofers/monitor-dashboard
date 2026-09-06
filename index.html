@@ -958,6 +958,14 @@
     const AGENDA_SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
     const AGENDA_SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
 
+    // Vestiging: standaard Roermond, of via ?loc=maastricht in de URL.
+    const DASH_LOC = (function(){
+      try{
+        const v = (new URLSearchParams(location.search).get("loc") || "").toLowerCase().trim();
+        return v || "roermond";
+      }catch(e){ return "roermond"; }
+    })();
+
     function agendaOccursOnToday(it, t){
       const parts = (it.start_date||"").split("-").map(Number);
       if(parts.length < 3 || !parts[0]) return false;
@@ -986,7 +994,10 @@
       const p = todayStr.split("-").map(Number);
       const t = new Date(p[0], p[1]-1, p[2]);
       try{
-        const url = AGENDA_SUPABASE_URL + "/rest/v1/agenda_items?select=*";
+        // Alleen de taken van deze vestiging (rijen zonder locatie tellen mee als vangnet),
+        // anders verschijnt elke taak dubbel zodra beide vestigingen gevuld zijn.
+        const url = AGENDA_SUPABASE_URL + "/rest/v1/agenda_items?select=*"
+          + "&or=(location.eq." + encodeURIComponent(DASH_LOC) + ",location.is.null)";
         const r = await fetch(url, { headers:{ apikey:AGENDA_SUPABASE_ANON, Authorization:"Bearer "+AGENDA_SUPABASE_ANON }, cache:"no-store" });
         if(r.ok){
           const rows = await r.json();
