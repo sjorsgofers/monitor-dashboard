@@ -981,6 +981,12 @@
           const diffDays = Math.round((t - start) / 86400000);
           return Math.floor(diffDays / 7) % 2 === 0;
         }
+        case "fourweekly": {
+          const wd=(it.weekdays&&it.weekdays.length)?it.weekdays:[start.getDay()];
+          if(!wd.includes(t.getDay())) return false;
+          const diffDays = Math.round((t - start) / 86400000);
+          return Math.floor(diffDays / 7) % 4 === 0;
+        }
         case "monthly": return t.getDate()===start.getDate();
         case "yearly": return t.getDate()===start.getDate() && t.getMonth()===start.getMonth();
         default: return t.getTime()===start.getTime();
